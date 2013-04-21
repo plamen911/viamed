@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+    <data>
+      <stm_name>Служба по трудова медицина</stm_name>
+      <popup_medical_checkup>
+        <conclusion>
+          <option>Клинично здрав(а)</option>
+          <option>Заболявания</option>
+          <option>Подлежи на диспансеризация</option>
+          <option>Подлежи на болнично лечение</option>
+          <option>Нуждае се от трудоустрояване</option>
+        </conclusion>
+        <hearing_loss>
+          <option>Приемна</option>
+          <option>Проводна</option>
+          <option>Смесена</option>
+        </hearing_loss>
+      </popup_medical_checkup>
+      <firm_foldres>
+          <abs_path>D:\plamen\programa\</abs_path>
+          <net_path>\\LYNXLAKE\programa</net_path>
+      </firm_foldres>
+    </data>
