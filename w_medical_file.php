@@ -1,5 +1,5 @@
 <?php
-// Test: http://localhost/stm2008/hipokrat/w_medical_file.php?worker_id=2851&offline=0
+// Test: http://localhost/stm2008/viamed/w_medical_file.php?worker_id=18864&offline=1
 
 require('includes.php');
 
