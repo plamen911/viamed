@@ -368,9 +368,8 @@ function loadAnamnesis($checkup_id = 0) {
 	    <td align="left" class="primary"><a href="#" id="mkb_code_<?=$row['anamnesis_id']?>" onclick="openMkbNomenclature(this);">МКБ <img src="img/moreinfo.gif" alt="info" border="0" width="17" height="17" /></a></td>
 	    <td align="left"><input type="text" id="mkb_id_<?=$row['anamnesis_id']?>" name="mkb_id_<?=$row['anamnesis_id']?>" size="10" maxlength="50" value="<?=HTMLFormat($row['mkb_id'])?>" />
 	      <span id="mkb_desc_<?=$row['anamnesis_id']?>"><?=HTMLFormat($row['mkb_desc'])?></span></td>
-	    <td align="left"><?php if(fnCheckAccess(array('admin', 'manager'))) { /* admin rights only */ ?>
+	    <td align="left">
 	      <a href="javascript:void(null);" onclick="var answ=confirm('Наистина ли искате да изтриете анамнезата?'); if(answ) { xajax_removeAnamnesis(<?=$row['anamnesis_id']?>, <?=$checkup_id?>); } return false;" title="Изтрий анамнезата"><img src="img/delete.gif" width="15" height="15" border="0" alt="Изтрий" /></a>
-	      <?php } ?>
 	      &nbsp;</td>
 	  </tr>
 	  <tr class="underline">
@@ -1054,7 +1053,7 @@ function downloadCard() {
 		alert('Моля, изберете медицински преглед.')
 		return false;
 	}
-	window.location = 'w_worker_card.php?checkup_id='+$("#checkup_id").val();
+	window.location = 'w_rtf_worker_card.php?checkup_id='+$("#checkup_id").val();
 }
 //]]>
 </script>

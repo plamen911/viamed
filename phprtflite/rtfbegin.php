@@ -1,5 +1,6 @@
 <?php
 // http://sourceforge.net/projects/phprtf/
+// http://sigma-scripts.de/phprtflite/docs/sections.html
 require('phprtflite/lib/PHPRtfLite.php');
 
 // register PHPRtfLite class loader
