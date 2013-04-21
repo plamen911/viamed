@@ -335,6 +335,7 @@ function echoPatientCharts($worker_id) {
 <title><?=SITE_NAME?></title>
 <link href="styles.css" rel="stylesheet" type="text/css" media="screen" />
 <?=$echoJS?>
+<script type="text/javascript" src="scw.js"></script>
 <script type="text/javascript" src="js/RegExpValidate.js"></script>
 <!-- http://jquery.com/demo/thickbox/ -->
 <script type="text/javascript" src="js/jquery-latest.pack.js"></script>
@@ -424,6 +425,10 @@ function newChart() {
 	$("#reason_desc").empty();
 
 	return false;
+}
+
+function fnCalcDaysOff() {
+	xajax_calcDaysOff($('#hospital_date_from').val(), $('#hospital_date_to').val());
 }
 //]]>
 </script>
@@ -592,10 +597,10 @@ body,html {
                 <input type="text" id="wname" name="wname" value="<?=((isset($w['lname']))?HTMLFormat($w['fname'].' '.$w['sname'].' '.$w['lname']):'')?>" size="65" maxlength="50" style="width:352px;" />
                 <div class="hr"></div>
                 <span class="labeltext"><strong>От дата:</strong> </span>
-                <input type="text" id="hospital_date_from" name="hospital_date_from" value="<?=((isset($f['hospital_date_from']))?HTMLFormat($f['hospital_date_from']):'')?>" size="20" maxlength="10" onchange="xajax_calcDaysOff($('#hospital_date_from').val(), $('#hospital_date_to').val());" /> г.
+                <input type="text" id="hospital_date_from" name="hospital_date_from" value="<?=((isset($f['hospital_date_from']))?HTMLFormat($f['hospital_date_from']):'')?>" size="20" maxlength="10" onchange="xajax_calcDaysOff($('#hospital_date_from').val(), $('#hospital_date_to').val());" onclick="scwNextAction=fnCalcDaysOff.runsAfterSCW(this);scwShow(this,event);" class="date_input" /> г.
                 <div class="br"></div>
                 <span class="labeltext"><strong>До дата: </strong></span>
-                <input type="text" id="hospital_date_to" name="hospital_date_to" value="<?=((isset($f['hospital_date_to']))?HTMLFormat($f['hospital_date_to']):'')?>" size="20" maxlength="10" onchange="xajax_calcDaysOff($('#hospital_date_from').val(), $('#hospital_date_to').val());" /> г. вкл.
+                <input type="text" id="hospital_date_to" name="hospital_date_to" value="<?=((isset($f['hospital_date_to']))?HTMLFormat($f['hospital_date_to']):'')?>" size="20" maxlength="10" onchange="xajax_calcDaysOff($('#hospital_date_from').val(), $('#hospital_date_to').val());" onclick="scwNextAction=fnCalcDaysOff.runsAfterSCW(this);scwShow(this,event);" class="date_input" /> г. вкл.
                 <div class="br"></div>
                 <span class="labeltext">ВН: </span>
                 <input type="text" id="days_off" name="days_off" value="<?=((isset($f['days_off']))?HTMLFormat($f['days_off']):'')?>" size="10" maxlength="50" onkeypress="return numbersonly(this, event);" />
