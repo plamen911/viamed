@@ -483,6 +483,16 @@ AND (julianday(`hospital_date_from`) <= julianday('$date_to')))";
 				$this->num_workers_primary_charts_4up = count($days_off_4up);
 				unset($days_off_4up);
 			}
+			
+			// hack asked by Asya from Viamed, Sofia
+			global $stm_name;
+			if(!empty($stm_name) && false !== strpos($stm_name, 'ВИАМЕД')) {
+				$this->avg_men = round($this->avg_men, 0);
+				$this->avg_women = round($this->avg_women, 0);
+				$this->avg_workers = $this->avg_men + $this->avg_women;
+				$this->sick_anual_workers = round($this->sick_anual_workers);
+			}
+			
 			// No sick workers
 			$no_sick_wIDs = array_diff($IDs, $sick_wIDs);
 			if(!empty($no_sick_wIDs)) {

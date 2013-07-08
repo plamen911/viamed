@@ -75,15 +75,6 @@ $avg_workers = $objStats->avg_workers;
 $avg_men = $objStats->avg_men;
 $avg_women = $objStats->avg_women;
 $sick_anual_workers = $objStats->sick_anual_workers;
-if(isset($f['firm_name'])) {
-	// hack asked by Asya from Viamed, Sofia
-	if(false !== strpos($stm_name, 'ВИАМЕД')) {
-		$avg_men = round($avg_men, 0);
-		$avg_women = round($avg_women, 0);
-		$avg_workers = $avg_men + $avg_women;
-		$sick_anual_workers = round($objStats->sick_anual_workers);
-	}
-}
 
 $data = array();
 $data[] = array('Средно-списъчен състав на работещите', 'М', 'Ж');
