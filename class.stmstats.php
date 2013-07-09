@@ -101,6 +101,7 @@ class StmStats extends SqliteDB {
 	var $num_diseases_medical_checkups = 0;	// Брой заболявания, открити при проведените задължителни периодични медицински прегледи
 	var $num_ill_workers_medical_checkups = 0;// Брой работещи със заболявания, открити при проведените задължителни периодични медицински прегледи
 	var $num_workers_labour_accidents = 0;	// Брой на работещите с трудови злополуки
+	var $num_workers_labour_accidents_ary = array();	// Работещите с трудови злополуки
 	
 	var $pro_diseases_by_worker = array();
 	var $workers_days_off_30up = array();		// Работещи с 30 и повече дни временна неработоспособност от заболявания
@@ -550,7 +551,7 @@ AND (julianday(`hospital_date_from`) <= julianday('$date_to')))";
 					}
 					// Брой на работещите с трудови злополуки
 					if(in_array($row['reason_id'], array('04', '05'))) {
-						$num_workers_labour_accidents[$row['worker_id']] = $row['mkb_id'];
+						$num_workers_labour_accidents[$row['worker_id']] = $row['mkb_id'].'&patient_charts&'.$row['chart_id'];
 						$this->workers_labour_accidents[$row['reason_id']] = (isset($this->workers_labour_accidents[$row['reason_id']])) ? ++$this->workers_labour_accidents[$row['reason_id']] : 1;
 					}
 					$this->patient_charts_by_worker[$row['worker_id']][] = $row;
@@ -624,7 +625,7 @@ AND (julianday(`hospital_date_from`) <= julianday('$date_to')))";
 			unset($rows);
 			
 			// *** TELKs
-			$sql = "SELECT t.* , i.position_id, i.`position_name` AS `position_name` 
+			$sql = "SELECT t.* , i.`position_id` AS `position_id`, i.`position_name` AS `position_name` 
 					FROM `telks` t
 					LEFT JOIN `workers` w ON (w.`worker_id` = t.`worker_id`)
 					LEFT JOIN `firm_struct_map` m ON (m.`map_id` = w.`map_id`)
@@ -648,7 +649,7 @@ AND (julianday(`hospital_date_from`) <= julianday('$date_to')))";
 					}
 					// Брой на работещите с трудови злополуки
 					if(!empty($row['mkb_id_3'])) {
-						$num_workers_labour_accidents[$row['worker_id']] = $row['mkb_id_3'];
+						$num_workers_labour_accidents[$row['worker_id']] = $row['mkb_id_3'].'&telks&'.$row['telk_id'];
 					}
 					$num_workers_with_telk[$row['worker_id']] = 1;
 				}
@@ -662,6 +663,7 @@ AND (julianday(`hospital_date_from`) <= julianday('$date_to')))";
 			$this->num_workers_with_telk = count($num_workers_with_telk);
 			unset($num_workers_with_telk);
 			$this->num_workers_labour_accidents = count($num_workers_labour_accidents);
+			$this->num_workers_labour_accidents_ary = $num_workers_labour_accidents;
 			unset($num_workers_labour_accidents);
 			// *** Medical checkups
 			$sql = "SELECT * 
@@ -2171,6 +2173,28 @@ EOT;
 			return "<b style='mso-bidi-font-weight:normal'>Няма предоставени данни</b>";
 		}
 		return "<b style='mso-bidi-font-weight:normal'>$freq</b>";
+	}
+	
+	// Работещи с трудови злополуки по пол, длъжност, МКБ и т.н.
+	public function getWorkersLabourAccidents() {
+		$aWorkers = array();
+		if(!empty($this->num_workers_labour_accidents_ary)) {
+			foreach ($this->num_workers_labour_accidents_ary as $worker_id => $pair) {
+				if(isset($this->workers[$worker_id])) {
+					list($mkb_id, $source, $source_id) = explode('&', $pair);
+					$this->workers[$worker_id]['mkb_id'] = $mkb_id;
+					$this->workers[$worker_id]['source'] = $source;
+					$this->workers[$worker_id]['source_id'] = $source_id;
+					$tmp = array();
+					foreach ($this->workers[$worker_id] as $key => $val) {
+						if(is_numeric($key)) continue;
+						$tmp[$key] = $val;	
+					}
+					$aWorkers[$worker_id] = $tmp;
+				}
+			}
+		}
+		return $aWorkers;
 	}
 	
 	// Честота на работещите със заболяемост с трайна неработоспособност
