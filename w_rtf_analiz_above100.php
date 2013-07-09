@@ -269,7 +269,7 @@ if(!empty($data)) {
 
 $data = $objStats->getWorkersLabourAccidents();
 $no_data = (!empty($data)) ? ':' : ': <b>Няма предоставени данни</b>.';
-$sect->writeText('Трудовите злополуки (по данни от първични болнични листове) по професии - брой и честота'.$no_data, $times12, $alignLeft);
+$sect->writeText('Трудови злополуки (по данни от първични болнични листове) по професии - брой и честота'.$no_data, $times12, $alignLeft);
 if(!empty($data)) {
 	$colWidts = array(13, 2, 2);
 	$colAligns = array('left', 'center', 'center');

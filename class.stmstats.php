@@ -2196,7 +2196,7 @@ EOT;
 				$data[] = array(($i+1).'. '.$position_name, $cnt, $freq);
 				$i++;
 			}
-			$data[] = array('Общо', $cnt_total, $freq_total);
+			$data[] = array('Общо първични болнични листове', $cnt_total, $freq_total);
 		}
 		return $data;
 	}
