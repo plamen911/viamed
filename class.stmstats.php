@@ -81,7 +81,7 @@ class StmStats extends SqliteDB {
 	var $primary_charts_age_36_45 = 0;
 	var $primary_charts_age_46_55 = 0;
 	var $primary_charts_age_55up = 0;
-
+	
 	var $days_off = 0;
 	var $days_off_men = 0;
 	var $days_off_women = 0;
@@ -114,6 +114,7 @@ class StmStats extends SqliteDB {
 	var $tbl_diseases_medical_checkups = '';	// Таблица: заболявания, открити при проведените задължителни периодични медицински прегледи
 	var $tbl_ill_workers_medical_checkups = '';	// Таблица: работещи със заболявания, открити при проведените задължителни периодични медицински прегледи
 	var $workers_labour_accidents = array();	// 
+	var $labour_accidents_by_position = array();
 
 	var $progroup_0 = 0;
 	var $progroup_1 = 0;
@@ -527,7 +528,6 @@ AND (julianday(`hospital_date_from`) <= julianday('$date_to')))";
 			$this->primary_charts = count($primaries);
 			$num_workers_labour_accidents = array();
 			$num_workers_pro_diseases = array();
-			$num_pro_diseases = array();
 			if(!empty($primaries)) {
 				foreach ($primaries as $row) {
 					if($sIDs[$row['worker_id']] == 'Ж') { $this->primary_charts_women += 1; }
@@ -553,6 +553,7 @@ AND (julianday(`hospital_date_from`) <= julianday('$date_to')))";
 					if(in_array($row['reason_id'], array('04', '05'))) {
 						$num_workers_labour_accidents[$row['worker_id']] = $row['mkb_id'].'&patient_charts&'.$row['chart_id'];
 						$this->workers_labour_accidents[$row['reason_id']] = (isset($this->workers_labour_accidents[$row['reason_id']])) ? ++$this->workers_labour_accidents[$row['reason_id']] : 1;
+						$this->labour_accidents_by_position[$_row[$row['worker_id']]['position_name']] = (isset($this->labour_accidents_by_position[$_row[$row['worker_id']]['position_name']])) ? ++$this->labour_accidents_by_position[$_row[$row['worker_id']]['position_name']] : 1;
 					}
 					$this->patient_charts_by_worker[$row['worker_id']][] = $row;
 				}
@@ -649,7 +650,7 @@ AND (julianday(`hospital_date_from`) <= julianday('$date_to')))";
 					}
 					// Брой на работещите с трудови злополуки
 					if(!empty($row['mkb_id_3'])) {
-						$num_workers_labour_accidents[$row['worker_id']] = $row['mkb_id_3'].'&telks&'.$row['telk_id'];
+						//$num_workers_labour_accidents[$row['worker_id']] = $row['mkb_id_3'].'&telks&'.$row['telk_id'];
 					}
 					$num_workers_with_telk[$row['worker_id']] = 1;
 				}
@@ -2165,10 +2166,12 @@ EOT;
 	
 	// Честота на работещите с трудови злополуки
 	public function freqWorkersLabourAccidents() {
-		if(empty($this->num_workers_labour_accidents)) {
+		//$labour_accidents = $this->num_workers_labour_accidents;
+		$labour_accidents = $this->getNumPrimaryChartsLabourAccidents();
+		if(empty($labour_accidents)) {
 			return "<b style='mso-bidi-font-weight:normal'>Няма предоставени данни</b>";
 		}
-		$freq = (!empty($this->avg_workers)) ? round(($this->num_workers_labour_accidents / $this->avg_workers) * 100, 2) : 0;
+		$freq = (!empty($this->avg_workers)) ? round(($labour_accidents / $this->avg_workers) * 100, 2) : 0;
 		if(empty($freq)) {
 			return "<b style='mso-bidi-font-weight:normal'>Няма предоставени данни</b>";
 		}
@@ -2177,24 +2180,25 @@ EOT;
 	
 	// Работещи с трудови злополуки по пол, длъжност, МКБ и т.н.
 	public function getWorkersLabourAccidents() {
-		$aWorkers = array();
-		if(!empty($this->num_workers_labour_accidents_ary)) {
-			foreach ($this->num_workers_labour_accidents_ary as $worker_id => $pair) {
-				if(isset($this->workers[$worker_id])) {
-					list($mkb_id, $source, $source_id) = explode('&', $pair);
-					$this->workers[$worker_id]['mkb_id'] = $mkb_id;
-					$this->workers[$worker_id]['source'] = $source;
-					$this->workers[$worker_id]['source_id'] = $source_id;
-					$tmp = array();
-					foreach ($this->workers[$worker_id] as $key => $val) {
-						if(is_numeric($key)) continue;
-						$tmp[$key] = $val;	
-					}
-					$aWorkers[$worker_id] = $tmp;
-				}
+		$data = array();
+		$rows = $this->labour_accidents_by_position;
+		if(!empty($rows)) {
+			ksort($rows);
+			$data = array();
+			$data[] = array('Професия', 'брой', 'честота');
+			$cnt_total = 0;
+			$freq_total = 0;
+			$i = 0;
+			foreach ($rows as $position_name => $cnt) {
+				$freq = (!empty($this->avg_workers)) ? round(($cnt / $this->avg_workers) * 100, 2) : 0;
+				$cnt_total += $cnt;
+				$freq_total += $freq;
+				$data[] = array(($i+1).'. '.$position_name, $cnt, $freq);
+				$i++;
 			}
+			$data[] = array('Общо', $cnt_total, $freq_total);
 		}
-		return $aWorkers;
+		return $data;
 	}
 	
 	// Честота на работещите със заболяемост с трайна неработоспособност
@@ -3052,6 +3056,18 @@ EOT;
 			return ob_get_clean();
 		}
 		return '';
+	}
+	
+	// Брой първични болнични листове с трудови злополуки
+	public function getNumPrimaryChartsLabourAccidents() {
+		$total = 0;
+		$rows = $this->workers_labour_accidents;
+		if(!empty($rows)) {
+			foreach ($rows as $reason_id => $cnt) {
+				$total += $cnt;	
+			}
+		}
+		return $total;
 	}
 
 	// Описание на трудовите злополуки: брой и причини

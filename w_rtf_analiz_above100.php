@@ -254,6 +254,28 @@ if(!empty($data)) {
 
 $sect->writeText('10. Честота на работещите с трудови злополуки: '.str_replace('<b style=\'mso-bidi-font-weight:normal\'>', '<b>', $objStats->freqWorkersLabourAccidents()).'.', $times12, $alignLeft);
 
+$data = array();
+$table = $objStats->getWorkersLabourAccidentsTable();
+if(!empty($table)) {
+	$data = fnExtractTableData($table);
+}
+$no_data = (!empty($data)) ? ':' : ': <b>Няма предоставени данни</b>.';
+$sect->writeText('Описание на трудовите злополуки (по данни от първични болнични листове) за '.$dbInst->extractYear($date_from, $date_to).' година – брой и причини'.$no_data, $times12, $alignLeft);
+if(!empty($data)) {
+	$colWidts = array(1, 3, 10);
+	$colAligns = array('center', 'center', 'center');
+	fnGenerateTable($data, $colWidts, $colAligns, $tableType = 'plain');
+}
+
+$data = $objStats->getWorkersLabourAccidents();
+$no_data = (!empty($data)) ? ':' : ': <b>Няма предоставени данни</b>.';
+$sect->writeText('Трудовите злополуки (по данни от първични болнични листове) по професии - брой и честота'.$no_data, $times12, $alignLeft);
+if(!empty($data)) {
+	$colWidts = array(13, 2, 2);
+	$colAligns = array('left', 'center', 'center');
+	fnGenerateTable($data, $colWidts, $colAligns, $tableType = 'plain');
+}
+
 $sect->writeText('11. Честота на работещите със заболяемост с трайна неработоспособност: '.str_replace('<b style=\'mso-bidi-font-weight:normal\'>', '<b>', $objStats->freqWorkersWithTelk()).'.', $times12, $alignLeft);
 
 $sect->writeText('12. Честота на лицата със заболявания, открити при проведените периодични медицински прегледи: '.str_replace('<b style=\'mso-bidi-font-weight:normal\'>', '<b>', $objStats->freqILLWorkersMedicalCheckups()).'.', $times12, $alignLeft);
