@@ -39,6 +39,7 @@ class SqliteDB
 				//$db = new PDO('sqlite2:example.db'); //sqlite 2
 				//$db = new PDO('sqlite::memory:'); //sqlite 3
 				$db = new PDO('sqlite:' . $dbfilepath . $dbfilename); //sqlite 3
+				$db->sqliteCreateFunction('LIKE', array(__CLASS__, 'lexa_ci_utf8_like'), 2);
 				/*
 				$db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
 				$db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
@@ -52,6 +53,17 @@ class SqliteDB
 			}
 		}
 		return $this->dbhandle;
+	}
+	
+	// Thanks to: http://blog.amartynov.ru/archives/php-sqlite-case-insensitive-like-utf8/
+	public function lexa_ci_utf8_like($mask, $value) {
+		$mask = str_replace(
+			array("%", "_"),
+			array(".*?", "."),
+			preg_quote($mask, "/")
+		);
+		$mask = "/^$mask$/ui";
+		return preg_match($mask, $value);
 	}
 
 	/**

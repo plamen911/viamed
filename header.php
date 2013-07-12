@@ -40,7 +40,7 @@ var ip_addr = '<?=((!empty($_SERVER['REMOTE_ADDR'])) ? $_SERVER['REMOTE_ADDR'] :
 <script type="text/javascript">
 //<![CDATA[
 function openMkb10(el) {
-	$(el).colorbox({width:"90%", height:"100%", iframe:true, overlayClose:false, title:'Номенклатура МКБ 10', transition:"none", fastIframe:false, href:'popup_mkb_nomenclature.php'});
+	$(el).colorbox({width:"90%", height:"100%", iframe:true, overlayClose:false, title:'Номенклатура МКБ 10', transition:"none", fastIframe:false, href:'popup_mkb_nomenclature.php', fixed:true});
 	return false;
 }
 function stripTable(tableid) {
