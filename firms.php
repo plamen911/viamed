@@ -113,7 +113,7 @@ ob_start();
 <script type="text/javascript">
 //<![CDATA[
 $(document).ready(function(){
-	$("#lnkAddFirm").colorbox({width:"100%", height:"100%", iframe:true, overlayClose:false, title:$("#lnkAddFirm").attr('title'), transition:"none", fastIframe:false, fixed:true});
+	$("#lnkAddFirm").colorbox({width:"98%", height:"100%", iframe:true, overlayClose:false, title:$("#lnkAddFirm").attr('title'), transition:"none", fastIframe:false, fixed:true});
 	$("a[id^='lnkanalysis_']").each(function(i){
 		var win_title = $(this).attr('title');
 		$(this).colorbox({width:"80%", height:"80%", iframe:true, overlayClose:false, title:win_title, transition:"none", fastIframe:false, fixed:true });

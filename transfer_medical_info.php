@@ -361,7 +361,11 @@ var transferMedicalInfo = function(){
 			success: function(result) {
 				$('#transferInner').append('<li>' + result.message + '<\/li>');
 				i++;
-				$('#progressInner').html(i);	
+				$('#progressInner').html(i);
+				if(i > IDs.length - 1) {
+					$('#transferDone').html('<h1>Готово! Медицинската информация от други фирми на ' + i + ' от <?=count($IDs)?> работещи бе успешно прехвърлена.<\/h1>');
+				}
+				$(window).scrollTop($(document).height());//scroll to bottom
 			}, // End success
 			error: function(jqXHR, textStatus, errorThrown) {
 				$('#transferInner').append("Error... " + textStatus + " / " + errorThrown);
@@ -381,8 +385,9 @@ var transferMedicalInfo = function(){
 </head>
 <body>
 <div id="contentinner" align="center">
-  <h1>Прехвърлена медицинска информация от други фирми - <span id="progressInner">0</span> от <?=count($IDs)?> работещи</h1>
+  <h1>Прехвърляне на медицинска информация от други фирми - <span id="progressInner">0</span> от <?=count($IDs)?> работещи</h1>
   <ol id="transferInner"></ol>
+  <div id="transferDone"></div>
 </div>
 </body>
 </html>

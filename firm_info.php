@@ -1108,11 +1108,11 @@ EOT;
 $(document).ready(function(){
 	$("a.workerinfo").each(function(i){
 		var win_title = $(this).attr('title');
-		$(this).colorbox({width:"100%", height:"100%", iframe:true, overlayClose:false, title:win_title, transition:"none", fastIframe:false, fixed:true });
+		$(this).colorbox({width:"98%", height:"100%", iframe:true, overlayClose:false, title:win_title, transition:"none", fastIframe:false, fixed:true });
 	});
 	$("#btnSubmit").click(function(e){
 		e.preventDefault();
-		$(this).colorbox({width:"100%", height:"100%", iframe:true, overlayClose:false, title:"Добавяне на нов работещ", transition:"none", fastIframe:false, href:"popup_worker.php?worker_id=0&firm_id=<?=$firm_id?>&<?=SESS_NAME.'='.session_id()?>", fixed:true });
+		$(this).colorbox({width:"98%", height:"100%", iframe:true, overlayClose:false, title:"Добавяне на нов работещ", transition:"none", fastIframe:false, href:"popup_worker.php?worker_id=0&firm_id=<?=$firm_id?>&<?=SESS_NAME.'='.session_id()?>", fixed:true });
 	});
 });
 //]]>
@@ -1187,17 +1187,17 @@ function advSort() {
 $(document).ready(function(){
 	$("a.workerinfo").each(function(i){
 		var win_title = $(this).attr('title');
-		$(this).colorbox({width:"100%", height:"100%", iframe:true, overlayClose:false, title:win_title, transition:"none", fastIframe:false, fixed:true });
+		$(this).colorbox({width:"98%", height:"100%", iframe:true, overlayClose:false, title:win_title, transition:"none", fastIframe:false, fixed:true });
 	});
 });
 function openWorkEnvFactors() {
 	if($("#wplace_id").val() == 0 || !$("#wplace_id").val()) return false;
-	$.colorbox({width:"100%", height:"100%", iframe:true, overlayClose:false, title:"Фактори на работното място", transition:"none", fastIframe:false, href:"popup_work_env_protocols.php?firm_id=" + $("#firm_id").val() + "&subdivision_id=" + $("#subdivision_id").val() + "&wplace_id=" + $("#wplace_id").val() + "&<?=SESS_NAME.'='.session_id()?>", fixed:true });
+	$.colorbox({width:"98%", height:"100%", iframe:true, overlayClose:false, title:"Фактори на работното място", transition:"none", fastIframe:false, href:"popup_work_env_protocols.php?firm_id=" + $("#firm_id").val() + "&subdivision_id=" + $("#subdivision_id").val() + "&wplace_id=" + $("#wplace_id").val() + "&<?=SESS_NAME.'='.session_id()?>", fixed:true });
 	return false;
 }
 function openGiveMCards() {
 	if($("#wplace_id").val() == 0 || !$("#wplace_id").val()) return false;
-	$.colorbox({width:"100%", height:"100%", iframe:true, overlayClose:false, title:"Карти за профилактични прегледи на работещи във фирмата", transition:"none", fastIframe:false, href:"popup_give_mcards.php?firm_id=" + $("#firm_id").val() + "&subdivision_id=" + $("#subdivision_id").val() + "&wplace_id=" + $("#wplace_id").val() + "&<?=SESS_NAME.'='.session_id()?>", fixed:true });
+	$.colorbox({width:"98%", height:"100%", iframe:true, overlayClose:false, title:"Карти за профилактични прегледи на работещи във фирмата", transition:"none", fastIframe:false, href:"popup_give_mcards.php?firm_id=" + $("#firm_id").val() + "&subdivision_id=" + $("#subdivision_id").val() + "&wplace_id=" + $("#wplace_id").val() + "&<?=SESS_NAME.'='.session_id()?>", fixed:true });
 	return false;
 }
 //]]>
