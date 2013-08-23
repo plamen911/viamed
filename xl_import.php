@@ -28,7 +28,7 @@ if(isset($_POST['btnImport']) && $_FILES['datafile']['tmp_name']) {
 		$data->read($_FILES['datafile']['tmp_name']);
 		if(1 < $data->sheets[0]['numRows']) {
 			// Remove old data
-			if(isset($_POST['chkRemoveExisting'])) {
+			/*if(isset($_POST['chkRemoveExisting'])) {
 				if($tab == 'charts') {
 					$sql = "DELETE FROM `patient_charts` WHERE `firm_id` = $firm_id AND julianday(`date_added`) >= julianday('".date('Y-m-d H:i:s', strtotime('-1 hours'))."')";
 					$dbInst->query($sql);
@@ -41,8 +41,8 @@ if(isset($_POST['btnImport']) && $_FILES['datafile']['tmp_name']) {
 						}
 					}
 				}
-			}
-
+			}*/
+			
 			$oldEGNs = array();
 			$oldPChDates = array();
 			if($tab == 'workers') {

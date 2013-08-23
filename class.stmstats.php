@@ -528,6 +528,7 @@ AND (julianday(`hospital_date_from`) <= julianday('$date_to')))";
 			$this->primary_charts = count($primaries);
 			$num_workers_labour_accidents = array();
 			$num_workers_pro_diseases = array();
+			$num_pro_diseases = array();
 			if(!empty($primaries)) {
 				foreach ($primaries as $row) {
 					if($sIDs[$row['worker_id']] == 'Ж') { $this->primary_charts_women += 1; }
