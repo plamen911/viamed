@@ -1130,7 +1130,7 @@ $(document).ready(function() {
 		return false;
 	});
 	$("#lnkAnalysisProphylactic").click(function(){
-		window.location = 'w_analysis_prophylactic.php?firm_id=<?=$firm_id?>&date_from=' + $("#date_from4").val() + '&date_to=' + $("#date_to4").val() + '&<?=SESS_NAME.'='.session_id()?>';
+		window.location = 'w_rtf_analysis_prophylactic.php?firm_id=<?=$firm_id?>&date_from=' + $("#date_from4").val() + '&date_to=' + $("#date_to4").val() + '&<?=SESS_NAME.'='.session_id()?>';
 		return false;
 	});
 	$("#lnkZVN").click(function(){
