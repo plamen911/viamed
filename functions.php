@@ -1193,7 +1193,8 @@ function getChart($data = array(), $imgname = '', $title = '') {
 		$imgname = str_replace(' ', '_', $imgname);
 	}
 	
-	$libchart_path = "http://" . ((isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : $_SERVER['SERVER_ADDR'].':'.$_SERVER['SERVER_PORT'])) . rtrim(dirname($_SERVER['PHP_SELF']), '/\\') . "/libchart/";
+	$http = !empty($_SERVER['HTTPS']) ? 'https://' : 'http://';
+	$libchart_path = $http . ((isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : $_SERVER['SERVER_ADDR'].':'.$_SERVER['SERVER_PORT'])) . rtrim(dirname($_SERVER['PHP_SELF']), '/\\') . "/libchart/";
 
 	$chart = new VerticalBarChart(660,300);
 	//$chart = new VerticalBarChart();
