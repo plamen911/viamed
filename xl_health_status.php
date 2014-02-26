@@ -623,7 +623,8 @@ echo '<?mso-application progid="Excel.Sheet"?>';
       </Row>
       <?php if(!empty($data)) { ?>
       	<?php foreach ($data as $row) { ?>
-      <Row ss:AutoFitHeight="0" ss:Height="127.5">
+      <!--<Row ss:AutoFitHeight="0" ss:Height="127.5">-->
+      <Row>
         <Cell ss:StyleID="s93">
           <Data ss:Type="Number"><?=$row['num']?></Data>
         </Cell>
