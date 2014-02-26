@@ -1,5 +1,5 @@
 <?php
-// http://localhost/stm2008/hipokrat/w_health_status.php?firm_id=174&offline=1
+// http://localhost/stm2008/viamed/w_health_status.php?firm_id=93&offline=1
 require('includes.php');
 
 $offline = (isset($_GET['offline']) && $_GET['offline'] == '1') ? 1 : 0;

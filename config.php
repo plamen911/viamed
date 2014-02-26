@@ -1,6 +1,6 @@
 <?php
 
-header("Content-type: text/html;charset=UTF-8");
+//header("Content-type: text/html;charset=UTF-8");
 
 if(isset($_SERVER['SERVER_ADMIN']) && 'plamen@lynxlake.org' == $_SERVER['SERVER_ADMIN']) {
 	error_reporting(E_ALL);

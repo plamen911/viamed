@@ -1143,7 +1143,7 @@ $(document).ready(function() {
 		return false;
 	});
 	$("#lnkHealthStatus").click(function(){
-		window.location = 'w_health_status.php?firm_id=<?=$firm_id?>&<?=SESS_NAME.'='.session_id()?>';
+		window.location = 'xl_health_status.php?firm_id=<?=$firm_id?>&<?=SESS_NAME.'='.session_id()?>';
 		return false;
 	});
 });
