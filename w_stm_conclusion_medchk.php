@@ -297,7 +297,7 @@ src="<?=$imgpath.((isset($f['stm_conclusion'])&&$f['stm_conclusion']=='2')?$chec
 style='mso-spacerun:yes'> </span><span style='mso-spacerun:yes'> </span>може да
 изпълнява посочената длъжност/професия при следните условия<o:p></o:p></span></p>
 
-<?php if(isset($f) && $f['stm_conditions'] != '') { ?>
+<?php if(isset($f) && $f['stm_conditions'] != '' && $f['stm_conclusion'] == '2') { ?>
 <p class=MsoNormal style='text-indent:35.4pt'><b style='mso-bidi-font-weight:
 normal'><span style='font-size:14.0pt'><b style='mso-bidi-font-weight:normal'><?=HTMLFormat($f['stm_conditions'])?></b><o:p></o:p></span></b></p>
 <?php } ?>
@@ -313,6 +313,11 @@ style='mso-spacerun:yes'> </span><span style='mso-spacerun:yes'> </span><?php 
 <p class=MsoNormal style='text-indent:35.4pt'><span style='font-size:14.0pt'><img width=13 height=13
 src="<?=$imgpath.((isset($f['stm_conclusion'])&&$f['stm_conclusion']=='3')?$checked:$unchecked)?>" alt="*"><span
 style='mso-spacerun:yes'> </span><span style='mso-spacerun:yes'> </span><?php if(isset($f['stm_conclusion'])&&$f['stm_conclusion']=='0') { ?><b style='mso-bidi-font-weight:normal'>не може да се прецени пригодността на работещия да изпълнява посочената длъжност/професия в съответното предприятие.</b><?php } else { ?>не може да се прецени пригодността на работещия да изпълнява посочената длъжност/професия в съответното предприятие.<?php } ?><o:p></o:p></span></p>
+
+<?php if(isset($f) && $f['stm_conditions'] != '' && $f['stm_conclusion'] == '3') { ?>
+<p class=MsoNormal style='text-indent:35.4pt'><b style='mso-bidi-font-weight:
+normal'><span style='font-size:14.0pt'><b style='mso-bidi-font-weight:normal'><?=HTMLFormat($f['stm_conditions'])?></b><o:p></o:p></span></b></p>
+<?php } ?>
 
 <?php w_footer($s, $f['stm_date2']); ?>
 

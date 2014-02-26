@@ -842,13 +842,18 @@ switch ($f['stm_conclusion']) {
 		break;
 	case '2':
 		echo '<p class=MsoNormal>Може да изпълнява посочената длъжност/професия '.HTMLFormat($f['position_name']).' в '.HTMLFormat($f['firm_name']).' при следните условия:</p>';
-		echo '<p class=MsoNormal>'.HTMLFormat($f['stm_conditions']).'</p>';
+		if(!empty($f['stm_conditions'])) {
+  			echo '<p class=MsoNormal>'.HTMLFormat($f['stm_conditions']).'</p>';
+  		}
 		break;
 	case '0':
 		echo '<p class=MsoNormal>Не може да изпълнява посочената длъжност/професия '.HTMLFormat($f['position_name']).' в '.HTMLFormat($f['firm_name']).'</p>';
 		break;
   	case '3':
   		echo '<p class=MsoNormal>Не може да се прецени пригодността на работещия да изпълнява посочената длъжност/професия '.HTMLFormat($f['position_name']).' в '.HTMLFormat($f['firm_name']).'</p>';
+  		if(!empty($f['stm_conditions'])) {
+  			echo '<p class=MsoNormal>'.HTMLFormat($f['stm_conditions']).'</p>';
+  		}
 	default:
 		break;
 }

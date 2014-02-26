@@ -1470,13 +1470,18 @@ style='mso-list:Ignore'><img width=13 height=13 src="<?=$imgpath.$checked?>" alt
   		break;
   	case '2':
   		echo '<p class=MsoNormal>Може да изпълнява посочената длъжност/професия '.HTMLFormat($f['position_name']).' в '.HTMLFormat($firm['name']).' при следните условия:</p>';
-  		echo '<p class=MsoNormal>'.HTMLFormat($line['stm_conditions']).'</p>';
+  		if(!empty($line['stm_conditions'])) {
+  			echo '<p class=MsoNormal>'.HTMLFormat($line['stm_conditions']).'</p>';
+  		}
   		break;
   	case '0':
   		echo '<p class=MsoNormal>Не може да изпълнява посочената длъжност/професия '.HTMLFormat($f['position_name']).' в '.HTMLFormat($firm['name']).'</p>';
   		break;
   	case '3':
   		echo '<p class=MsoNormal>Не може да се прецени пригодността на работещия да изпълнява посочената длъжност/професия '.HTMLFormat($f['position_name']).' в '.HTMLFormat($firm['name']).'</p>';
+  		if(!empty($line['stm_conditions'])) {
+  			echo '<p class=MsoNormal>'.HTMLFormat($line['stm_conditions']).'</p>';
+  		}
   		break;
 
   	default:

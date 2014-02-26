@@ -824,7 +824,7 @@ function echoConclusionSTM($checkup_id=0) {
                       <option value="3"<?=((isset($f['stm_conclusion'])&&$f['stm_conclusion']=='3')?' selected="selected"':'')?>>не може да се прецени пригодността на работещия</option>
                     </select>
                     да изпълнява тази длъжност/професия<br />
-                    <textarea id="stm_conditions" name="stm_conditions" rows="4" cols="60"<?=((isset($f['stm_conclusion'])&&$f['stm_conclusion']=='2')?'':' style="display:none"')?>><?=((isset($f['stm_conditions']))?HTMLFormat($f['stm_conditions']):'')?></textarea></td>
+                    <textarea id="stm_conditions" name="stm_conditions" rows="4" cols="60"<?=((isset($f['stm_conclusion']) && in_array($f['stm_conclusion'], array('2', '3')))?'':' style="display:none"')?>><?=((isset($f['stm_conditions']))?HTMLFormat($f['stm_conditions']):'')?></textarea></td>
                   </tr>
                   <tr>
                     <td align="left"><p>Дата на изготвяне:</p></td>
@@ -860,7 +860,7 @@ $(document).ready(function() {
 		$(":checkbox").css("border","none");
 	}
 	$("#stm_conclusion").change(function(){
-		if(this.value == '2') {
+		if(this.value == '2' || this.value == '3') {
 			$("#stm_conditions").show("slow");
 		} else {
 			$("#stm_conditions").val('');

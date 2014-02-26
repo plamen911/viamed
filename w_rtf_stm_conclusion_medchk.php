@@ -98,6 +98,9 @@ if(isset($f['stm_conclusion']) && '3' == $f['stm_conclusion']) {
 	$checkbox->setChecked();
 	$sect->writeText('<b>не може да се прецени пригодността на работещия да изпълнява посочената длъжност/професия в съответното предприятие.</b>', $times14, $alignLeft);
 	$sect->writeText($stm_conditions, $times14, $alignLeft);
+	if(!empty($stm_conditions)) {
+		$sect->writeText($stm_conditions, $times14, $alignLeft);
+	}
 } else {
 	$sect->writeText('не може да се прецени пригодността на работещия да изпълнява посочената длъжност/професия в съответното предприятие.', $times14, $alignLeft);
 }
