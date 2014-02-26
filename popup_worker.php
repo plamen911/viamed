@@ -64,7 +64,7 @@ function processWorker($aFormValues) {
 			$lines[] = $i.'). '.$row['fname'].' '.$row['sname'].' '.$row['lname'].' ('.$row['firm_name'].')'.((!empty($row['date_retired']) && false !== $ts = strtotime($row['date_retired'])) ? ', напуснал на '.date('d.m.Y', $ts).' г.' : '');
 			$i++;
 		}
-		$msg = "Въведеният ЕГН ($aFormValues[egn]) съвпада с ЕГН на:\n";
+		$msg = "Въведеният ЕГН/ЛНЧ ($aFormValues[egn]) съвпада с ЕГН/ЛНЧ на:\n";
 		$msg .= implode("\n", $lines);
 		$objResponse->alert($msg);
 		return $objResponse;
@@ -76,6 +76,14 @@ function processWorker($aFormValues) {
 	}
 
 	$d = new ParseBGDate();
+	if( trim($aFormValues['birth_date']) == '' ) {
+		$objResponse->alert('Моля, въведете дата на раждане.');
+		return $objResponse;
+	}
+	if( !$d->Parse(trim($aFormValues['birth_date'])) ) {
+		$objResponse->alert(trim($aFormValues['birth_date']).' е невалидна дата!');
+		return $objResponse;
+	}
 	if( trim($aFormValues['date_curr_position_start']) != '' && !$d->Parse(trim($aFormValues['date_curr_position_start'])) ) {
 		$objResponse->alert(trim($aFormValues['date_curr_position_start']).' е невалидна дата!');
 		return $objResponse;
@@ -491,7 +499,7 @@ function echoWorkerData($worker_id, $firmInfo) {
               </td>
           </tr>
           <tr>
-            <td class="leftSplit"><strong>ЕГН:</strong></td>
+            <td class="leftSplit"><strong>ЕГН/ЛНЧ:</strong></td>
             <td>
                 <input type="text" id="egn" name="egn" value="<?=((isset($f['egn']))?HTMLFormat($f['egn']):'')?>" size="15" maxlength="15" onKeyPress="return numbersonly(this, event);" onchange="xajax_calcBirthDate(this.value);" />
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Пол:
@@ -806,12 +814,12 @@ function postData() {
 	}
 	var egn = $.trim($('#egn').val());
 	if(egn == '') {
-		alert('Моля, въведете ЕГН на работещия.');
+		alert('Моля, въведете ЕГН/ЛНЧ на работещия.');
 		$('#egn').focus();
 		return false;
 	}
 	if(egn.length != 10) {
-		if(!confirm('Сигурни ли сте, че въведеният ЕГН е правилен?')) {
+		if(!confirm('Сигурни ли сте, че въведеният ЕГН/ЛНЧ е правилен?')) {
 			return false;
 		}
 	}
