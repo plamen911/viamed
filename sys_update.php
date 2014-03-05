@@ -11,7 +11,7 @@ if(isset($_POST['btnImport']) && $_FILES['datafile']['tmp_name'] && isset($_SESS
 	$mime_type = $_FILES['datafile']['type'];
 	$filesize = $_FILES['datafile']['size'];
 	//Allowable file Mime Types. Add more mime types if you want
-	$FILE_MIMES = array('application/zip', 'application/x-zip-compressed');
+	$FILE_MIMES = array('application/zip', 'application/x-zip-compressed', 'application/octet-stream');
 	//Allowable file ext. names. you may add more extension names.
 	$FILE_EXTS = array('zip');
 	$file_ext = (preg_match('/\.([A-Za-z]+)$/i', $filename, $matches)) ? strtolower($matches[1]) : '';
