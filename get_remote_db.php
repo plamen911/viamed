@@ -3,7 +3,7 @@ require('config.php');
 require ("functions.php");
 require ("sqlitedb.php");
 
-error_reporting(E_ALL);
+error_reporting(E_ERROR | E_WARNING | E_PARSE | E_NOTICE);
 
 $ret['errcode'] = 0;
 $ret['errmsg'] = '212';

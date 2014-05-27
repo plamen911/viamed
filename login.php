@@ -15,8 +15,6 @@ if (isset($_GET['logout']) && $_GET['logout'] == '1') {
 	exit();
 }
 
-
-
 // Xajax begin
 require ('xajax/xajax_core/xajax.inc.php');
 function login($aFormValues)

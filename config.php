@@ -3,7 +3,7 @@
 //header("Content-type: text/html;charset=UTF-8");
 
 if(isset($_SERVER['SERVER_ADMIN']) && 'plamen@lynxlake.org' == $_SERVER['SERVER_ADMIN']) {
-	error_reporting(E_ALL);
+    error_reporting(E_ERROR | E_WARNING | E_PARSE | E_NOTICE);
 } else {
 	error_reporting(0);
 }
