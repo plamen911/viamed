@@ -580,6 +580,16 @@ function echoWorkers($firm_id)
 			$txtCondition .= ")";
 		}
 	}
+    if (isset($_GET['IDs']) && !empty($_GET['IDs'])) {
+        $IDs = preg_split('/\s*,\s*/', trim($_GET['IDs']), -1, PREG_SPLIT_NO_EMPTY);
+        if (!empty($IDs)) {
+            foreach ($IDs as $key => $val) {
+                $IDs[$key] = intval($val);
+            }
+            $txtCondition .= (preg_match('/\bWHERE\b/', $txtCondition)) ? ' AND ' : ' WHERE ';
+            $txtCondition .= "(w.worker_id IN (" . implode(',', $IDs) . "))";
+        }
+    }
 	if (isset($_GET['chkRetired'])) {
 		//TODO
 	} else {

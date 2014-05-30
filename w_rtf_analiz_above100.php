@@ -1,5 +1,6 @@
 <?php
 // http://localhost/stm2008/hipokrat/w_rtf_analiz_above100.php?firm_id=187&date_from=01.01.2011&date_to=31.12.2012
+ini_set('memory_limit', '128M');
 require('includes.php');
 require('class.stmstats.php');
 

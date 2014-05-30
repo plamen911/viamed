@@ -547,7 +547,7 @@ AND (julianday(`hospital_date_from`) <= julianday('$date_to')))";
 					if(in_array($row['reason_id'], array('02', '03'))) {
 						(isset($num_workers_pro_diseases[$row['worker_id']])) ? $num_workers_pro_diseases[$row['worker_id']]++ : $num_workers_pro_diseases[$row['worker_id']] = 1;
 						$num_pro_diseases[$row['mkb_id']] = 1;
-						$this->pro_diseases_by_worker[$row['worker_id']] = $row['mkb_id'];
+						$this->pro_diseases_by_worker[$row['worker_id']][] = $row['mkb_id'];
 						$this->pro_diseases[] = array('worker_id' => $row['worker_id'], 'mkb_id' => $row['mkb_id']);
 					}
 					// Брой на работещите с трудови злополуки
@@ -646,7 +646,7 @@ AND (julianday(`hospital_date_from`) <= julianday('$date_to')))";
 					if(!empty($row['mkb_id_4'])) {
 						(isset($num_workers_pro_diseases[$row['worker_id']])) ? $num_workers_pro_diseases[$row['worker_id']]++ : $num_workers_pro_diseases[$row['worker_id']] = 1;	
 						$num_pro_diseases[$row['mkb_id_4']] = 1;
-						$this->pro_diseases_by_worker[$row['worker_id']] = $row['mkb_id_4'];
+						$this->pro_diseases_by_worker[$row['worker_id']][] = $row['mkb_id_4'];
 						$this->pro_diseases[] = array('worker_id' => $row['worker_id'], 'mkb_id' => $row['mkb_id_4']);
 					}
 					// Брой на работещите с трудови злополуки
@@ -2468,7 +2468,7 @@ EOT;
 				<?php
 				$i = 1;
 				foreach ($rows as $row) {
-					$mkb = (isset($this->pro_diseases_by_worker[$row['worker_id']])) ? $this->pro_diseases_by_worker[$row['worker_id']] : '--';
+					$mkb = (isset($this->pro_diseases_by_worker[$row['worker_id']])) ? implode('; ', $this->pro_diseases_by_worker[$row['worker_id']]) : '--';
 					?>
 				 <tr style='mso-yfti-irow:<?php echo $i; ?>'>
 				  <td width=154 style='width:115.4pt;border:solid windowtext 1.0pt;border-top:

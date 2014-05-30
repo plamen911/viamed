@@ -32,6 +32,16 @@ if(!isset($_POST['xjxr'])) {
 
 $dbInst = new SqliteDB();
 
+// Require the idiorm file
+require('idiorm.php');
+// Connect to the demo database file
+ORM::configure('sqlite:./db/stm.db');
+
+$added_by = $modified_by = $updated_by = (isset($_SESSION['sess_user_id'])) ? $_SESSION['sess_user_id'] : 0;
+$added_by_txt = $modified_by_txt = $updated_by_txt = (isset($_SESSION['sess_fname'])) ? $dbInst->checkStr($_SESSION['sess_fname'] . ' ' . $_SESSION['sess_lname']) : '';
+$added_on = $modified_on = $updated_on = date('Y-m-d H:i:s');
+$added_from_ip = $updated_from_ip = (isset($_SERVER['REMOTE_ADDR'])) ? $dbInst->checkStr($_SERVER['REMOTE_ADDR']) : $_SERVER['REMOTE_ADDR'];
+
 @set_magic_quotes_runtime(0);
 // the magic_quotes_gpc workaround
 if(get_magic_quotes_gpc()) {
