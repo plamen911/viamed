@@ -311,7 +311,7 @@ function loadFamilyWeights($checkup_id) {
 	<table cellpadding="0" cellspacing="0">
 	  <tr class="underline">
 	    <td align="left"><strong>Описание</strong></td>
-	    <td align="left"><textarea id="fweights_descr" name="fweights_descr" rows="2" cols="110"><?=HTMLFormat($fweights_descr)?></textarea></td>
+	    <td align="left"><textarea id="fweights_descr" name="fweights_descr" rows="2" cols="104"><?=HTMLFormat($fweights_descr)?></textarea></td>
 	    <td align="left">&nbsp;</td>
 	  </tr>	
 	  <?php foreach ($rows as $row) { ?>
@@ -328,7 +328,7 @@ function loadFamilyWeights($checkup_id) {
 	  </tr>
 	  <tr class="underline">
 	    <td><strong>Диагноза</strong></td>
-	    <td><textarea id="diagnosis_<?=$row['family_weight_id']?>" name="diagnosis_<?=$row['family_weight_id']?>" rows="2" cols="110"><?=HTMLFormat($row['diagnosis'])?></textarea></td>
+	    <td><textarea id="diagnosis_<?=$row['family_weight_id']?>" name="diagnosis_<?=$row['family_weight_id']?>" rows="2" cols="104"><?=HTMLFormat($row['diagnosis'])?></textarea></td>
 	    <td>&nbsp;</td>
 	  </tr>
 	  <?php } ?>
@@ -340,7 +340,7 @@ function loadFamilyWeights($checkup_id) {
 	  </tr>
 	  <tr>
 	    <td><strong>Диагноза</strong></td>
-	    <td><textarea id="diagnosis_0" name="diagnosis_0" rows="2" cols="110" class="newItem"></textarea></td>
+	    <td><textarea id="diagnosis_0" name="diagnosis_0" rows="2" cols="104" class="newItem"></textarea></td>
 	    <td>&nbsp;</td>
 	  </tr>
 	</table>
@@ -360,7 +360,7 @@ function loadAnamnesis($checkup_id = 0) {
 	<table cellpadding="0" cellspacing="0">
 	  <tr class="underline">
 	    <td align="left"><strong>Описание</strong></td>
-	    <td align="left"><textarea id="anamnesis_descr" name="anamnesis_descr" rows="2" cols="110"><?=HTMLFormat($anamnesis_descr)?></textarea></td>
+	    <td align="left"><textarea id="anamnesis_descr" name="anamnesis_descr" rows="2" cols="104"><?=HTMLFormat($anamnesis_descr)?></textarea></td>
 	    <td align="left">&nbsp;</td>
 	  </tr>
 	  <?php foreach ($rows as $row) { ?>
@@ -374,7 +374,7 @@ function loadAnamnesis($checkup_id = 0) {
 	  </tr>
 	  <tr class="underline">
 	    <td align="left"><strong>Анамнеза</strong></td>
-	    <td align="left"><textarea id="diagnosis_<?=$row['anamnesis_id']?>" name="diagnosis_<?=$row['anamnesis_id']?>" rows="2" cols="110"><?=HTMLFormat($row['diagnosis'])?></textarea></td>
+	    <td align="left"><textarea id="diagnosis_<?=$row['anamnesis_id']?>" name="diagnosis_<?=$row['anamnesis_id']?>" rows="2" cols="104"><?=HTMLFormat($row['diagnosis'])?></textarea></td>
 	    <td align="left">&nbsp;</td>
 	  </tr>
 	  <?php } ?>
@@ -386,7 +386,7 @@ function loadAnamnesis($checkup_id = 0) {
 	  </tr>
 	  <tr>
 	    <td align="left"><strong>Анамнеза</strong></td>
-	    <td align="left"><textarea id="diagnosis_0" name="diagnosis_0" rows="2" cols="110" class="newItem"></textarea></td>
+	    <td align="left"><textarea id="diagnosis_0" name="diagnosis_0" rows="2" cols="104" class="newItem"></textarea></td>
 	    <td align="left">&nbsp;</td>
 	  </tr>
 	</table>

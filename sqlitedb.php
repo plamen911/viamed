@@ -2122,6 +2122,52 @@ class SqliteDB
 		}
 	}
 
+	public function processLastPrchkCheckup($worker_id=0) {
+		$db = $this->getDBHandle();
+		try {
+			$prchk_author = $prchk_date = $prchk_anamnesis = $prchk_data = $prchk_conclusion = $prchk_conditions = $prchk_stm_date = $prchk_obstetrician = $prchk_obstetrician_doc = $prchk_dermatologist = $prchk_dermatologist_doc = $prchk_internal_diseases = $prchk_internal_diseases_doc = $prchk_ophthalmologist = $prchk_ophthalmologist_doc = $prchk_pathologist = $prchk_pathologist_doc = $prchk_UNG = $prchk_UNG_doc = $prchk_neurologist = $prchk_neurologist_doc = $prchk_surgeon = $prchk_surgeon_doc = $prchk_GP = $prchk_GP_doc = $prchk_dentist = $prchk_dentist_doc = '';
+			$prchk_cardiologist = $prchk_cardiologist_doc = $prchk_therapeutist = $prchk_therapeutist_doc = $prchk_psychiatrist = $prchk_psychiatrist_doc = $prchk_radiobiologist = $prchk_radiobiologist_doc = $prchk_doctor_tm = $prchk_doctor_tm_doc = $prchk_assisant_tm = $prchk_assisant_tm_doc = '';
+			$query = "SELECT * FROM `medical_precheckups` WHERE `worker_id` = $worker_id ORDER BY `prchk_date` DESC, `precheckup_id` DESC LIMIT 1";
+			$rows = $this->query($query);
+			if(!empty($rows)) {
+				$row = $rows[0];
+				$var_list = array('precheckup_id' => 'precheckup_id', 'prchk_author' => 'prchk_author', 'prchk_date' => 'prchk_date',
+				'prchk_anamnesis' => 'prchk_anamnesis', 'prchk_data' => 'prchk_data', 'prchk_conclusion' => 'prchk_conclusion',
+				'prchk_conditions' => 'prchk_conditions', 'prchk_stm_date' => 'prchk_stm_date',
+				'prchk_obstetrician' => 'prchk_obstetrician',
+				'prchk_obstetrician_doc' => 'prchk_obstetrician_doc', 'prchk_dermatologist' =>
+				'prchk_dermatologist', 'prchk_dermatologist_doc' => 'prchk_dermatologist_doc',
+				'prchk_internal_diseases' => 'prchk_internal_diseases',
+				'prchk_internal_diseases_doc' => 'prchk_internal_diseases_doc',
+				'prchk_ophthalmologist' => 'prchk_ophthalmologist', 'prchk_ophthalmologist_doc' =>
+				'prchk_ophthalmologist_doc', 'prchk_pathologist' => 'prchk_pathologist',
+				'prchk_pathologist_doc' => 'prchk_pathologist_doc', 'prchk_UNG' => 'prchk_UNG',
+				'prchk_UNG_doc' => 'prchk_UNG_doc', 'prchk_neurologist' => 'prchk_neurologist',
+				'prchk_neurologist_doc' => 'prchk_neurologist_doc', 'prchk_surgeon' =>
+				'prchk_surgeon', 'prchk_surgeon_doc' => 'prchk_surgeon_doc', 'prchk_GP' =>
+				'prchk_GP', 'prchk_GP_doc' => 'prchk_GP_doc', 'prchk_dentist' => 'prchk_dentist',
+				'prchk_dentist_doc' => 'prchk_dentist_doc',
+				'prchk_cardiologist' => 'prchk_cardiologist', 'prchk_cardiologist_doc' => 'prchk_cardiologist_doc',
+				'prchk_therapeutist' => 'prchk_therapeutist', 'prchk_therapeutist_doc' => 'prchk_therapeutist_doc',
+				'prchk_psychiatrist' => 'prchk_psychiatrist', 'prchk_psychiatrist_doc' => 'prchk_psychiatrist_doc',
+				'prchk_radiobiologist' => 'prchk_radiobiologist', 'prchk_radiobiologist_doc' => 'prchk_radiobiologist_doc',
+				'prchk_doctor_tm' => 'prchk_doctor_tm', 'prchk_doctor_tm_doc' => 'prchk_doctor_tm_doc',
+				'prchk_assisant_tm' => 'prchk_assisant_tm', 'prchk_assisant_tm_doc' => 'prchk_assisant_tm_doc');
+				while (list($var, $param) = @each($var_list)) {
+					if (isset($row[$param]))
+					$$var = $this->checkStr($row[$param]);
+				} //end while
+				$query = "UPDATE `workers` SET prchk_author = '$prchk_author', prchk_date = '$prchk_date', `prchk_anamnesis` = '$prchk_anamnesis', `prchk_data` = '$prchk_data', `prchk_conclusion` = '$prchk_conclusion', `prchk_conditions` = '$prchk_conditions', `prchk_stm_date` = '$prchk_stm_date', prchk_obstetrician = '$prchk_obstetrician', prchk_obstetrician_doc = '$prchk_obstetrician_doc', prchk_dermatologist = '$prchk_dermatologist', prchk_dermatologist_doc = '$prchk_dermatologist_doc', prchk_internal_diseases = '$prchk_internal_diseases', prchk_internal_diseases_doc = '$prchk_internal_diseases_doc', prchk_ophthalmologist = '$prchk_ophthalmologist', prchk_ophthalmologist_doc = '$prchk_ophthalmologist_doc', prchk_pathologist = '$prchk_pathologist', prchk_pathologist_doc = '$prchk_pathologist_doc', prchk_UNG = '$prchk_UNG', prchk_UNG_doc = '$prchk_UNG_doc', prchk_neurologist = '$prchk_neurologist', prchk_neurologist_doc = '$prchk_neurologist_doc', prchk_surgeon = '$prchk_surgeon', prchk_surgeon_doc = '$prchk_surgeon_doc', prchk_GP = '$prchk_GP', prchk_GP_doc = '$prchk_GP_doc', prchk_dentist = '$prchk_dentist', prchk_dentist_doc = '$prchk_dentist_doc', `prchk_cardiologist` = '$prchk_cardiologist', `prchk_cardiologist_doc` = '$prchk_cardiologist_doc', `prchk_therapeutist` = '$prchk_therapeutist', `prchk_therapeutist_doc` = '$prchk_therapeutist_doc', `prchk_psychiatrist` = '$prchk_psychiatrist', `prchk_psychiatrist_doc` = '$prchk_psychiatrist_doc', `prchk_radiobiologist` = '$prchk_radiobiologist', `prchk_radiobiologist_doc` = '$prchk_radiobiologist_doc', `prchk_doctor_tm` = '$prchk_doctor_tm', `prchk_doctor_tm_doc` = '$prchk_doctor_tm_doc', `prchk_assisant_tm` = '$prchk_assisant_tm', `prchk_assisant_tm_doc` = '$prchk_assisant_tm_doc', date_modified = datetime('now','localtime') WHERE worker_id = $worker_id";
+			} else {
+				$query = "UPDATE `workers` SET prchk_author = '', prchk_date = '', `prchk_anamnesis` = '', `prchk_data` = '', `prchk_conclusion` = '', `prchk_conditions` = '', `prchk_stm_date` = '', prchk_obstetrician = '', prchk_obstetrician_doc = '', prchk_dermatologist = '', prchk_dermatologist_doc = '', prchk_internal_diseases = '', prchk_internal_diseases_doc = '', prchk_ophthalmologist = '', prchk_ophthalmologist_doc = '', prchk_pathologist = '', prchk_pathologist_doc = '', prchk_UNG = '', prchk_UNG_doc = '', prchk_neurologist = '', prchk_neurologist_doc = '', prchk_surgeon = '', prchk_surgeon_doc = '', prchk_GP = '', prchk_GP_doc = '', prchk_dentist = '', prchk_dentist_doc = '', `prchk_cardiologist` = '', `prchk_cardiologist_doc` = '', `prchk_therapeutist` = '', `prchk_therapeutist_doc` = '', `prchk_psychiatrist` = '', `prchk_psychiatrist_doc` = '', `prchk_radiobiologist` = '', `prchk_radiobiologist_doc` = '', `prchk_doctor_tm` = '', `prchk_doctor_tm_doc` = '', `prchk_assisant_tm` = '', `prchk_assisant_tm_doc` = '', date_modified = datetime('now','localtime') WHERE worker_id = $worker_id";
+			}
+			$count = $db->exec($query); //returns affected rows
+		}
+		catch (exception $e) {
+			die("Грешка при изпълнение на заявка към базата данни: " . $e->getMessage());
+		}
+	}
+	
 	/**
      * @desc add a new medical checkup
      * @param $aFormValues - form values

@@ -4,6 +4,200 @@ require ('includes.php');
 $firm_id = (isset($_GET['firm_id']) && is_numeric($_GET['firm_id'])) ? intval($_GET['firm_id']) : 0;
 $tab = (isset($_GET['tab']) && in_array($_GET['tab'], array('info', 'struct', 'struct_map', 'workers', 'charts', 'checkup', 'telks'))) ? $_GET['tab'] : 'info';
 
+if(isset($_POST['ajax_req'])) {
+	$ret['code'] = 0;
+	$ret['message'] = '';
+	$ret['data'] = array();
+	switch ($_POST['ajax_req']) {
+		case 'load_src_firms':
+			$content = ' от <select id="src_firm_id" name="src_firm_id">';
+			$content .= '<option value="">- изберете фирма -</option>';
+			$rows = $dbInst->query("SELECT `firm_id`, `name` FROM `firms` WHERE `firm_id` != $firm_id AND `is_active` = 1 ORDER BY `name`");
+			if(!empty($rows)) {
+				foreach ($rows as $row) {
+					$content .= '<option value="'.$row['firm_id'].'">'.HTMLFormat($row['name']).'</option>';
+				}
+			}
+			$content .= '</select>';
+			$content .= '<input type="button" id="btnCopyMedInfo" name="btnCopyMedInfo" value="Копирай" class="nicerButtons" />';
+			$ret['data']['content'] = $content;
+			die(json_encode($ret));
+			
+		case 'copy_medical_info':
+			//data sanitization
+			$wIDs = (isset($_POST['wIDs']) && !empty($_POST['wIDs']) && $ary = explode(',', $_POST['wIDs'])) ? $ary : array();
+			if(empty($wIDs)) {
+				$ret['code'] = 0;
+				$ret['message'] = 'Няма избрани работещи!';
+				die(json_encode($ret));
+			}
+			$ary = array();
+			foreach ($wIDs as $i => $worker_id) {
+				$worker_id = intval($worker_id);
+				$ary[$worker_id] = $worker_id;
+			}
+			$wIDs = $ary; unset($ary);
+			$src_firm_id = (isset($_POST['src_firm_id'])) ? intval($_POST['src_firm_id']) : 0;
+			if(empty($src_firm_id)) {
+				$ret['code'] = 0;
+				$ret['message'] = 'Няма избрана фирма, от която да се копира медицинска информация!';
+				die(json_encode($ret));
+			}
+			//map new and old worker_id
+			$sql = "SELECT w.worker_id AS worker_id, w2.worker_id AS src_worker_id
+					FROM workers w
+					LEFT JOIN workers w2 ON ( w2.egn = w.egn )
+					WHERE w.worker_id IN ( ".implode(',', $wIDs)." )
+					AND w2.firm_id = $src_firm_id
+					ORDER BY w.fname, w.sname, w.lname";
+			$rows = $dbInst->query($sql);
+			$IDMap = array();
+			if(!empty($rows)) {
+				foreach ($rows as $row) {
+					$IDMap[$row['worker_id']] = $row['src_worker_id'];
+				}
+			}
+			//data transfer
+			$passed = 0;
+			foreach ($IDMap as $worker_id => $src_worker_id) {
+				//1). Copy patient_charts
+				$rows = $dbInst->query("SELECT * FROM `patient_charts` WHERE `worker_id` = $src_worker_id");
+				if(!empty($rows)) {
+					foreach ($rows as $row) {
+						$sql = generateInsertSql($row, 'patient_charts', array('chart_id'), array('worker_id' => $worker_id, 'firm_id' => $firm_id));
+						$dbInst->query($sql);
+					}
+				}
+				//2). Copy TELKs
+				$rows = $dbInst->query("SELECT * FROM `telks` WHERE `worker_id` = $src_worker_id");
+				if(!empty($rows)) {
+					foreach ($rows as $row) {
+						$sql = generateInsertSql($row, 'telks', array('telk_id'), array('worker_id' => $worker_id, 'firm_id' => $firm_id));
+						$dbInst->query($sql);
+					}
+				}
+				//3). Copy Профилактични прегледи
+				$rows = $dbInst->query("SELECT * FROM `medical_checkups` WHERE `worker_id` = $src_worker_id");
+				if(!empty($rows)) {
+					foreach ($rows as $row) {
+						$sql = generateInsertSql($row, 'medical_checkups', array('checkup_id'), array('worker_id' => $worker_id, 'firm_id' => $firm_id));
+						$checkup_id = $dbInst->query($sql);
+						//family_weights
+						$sql = "SELECT * FROM `family_weights` WHERE `checkup_id` = $row[checkup_id]";
+						$flds = $dbInst->query($sql);
+						if(!empty($flds)) {
+							foreach ($flds as $fld) {
+								$sql = generateInsertSql($fld, 'family_weights', array('family_weight_id'), array('worker_id' => $worker_id, 'firm_id' => $firm_id, 'checkup_id' => $checkup_id));
+								$dbInst->query($sql);
+							}
+						}
+						//anamnesis
+						$sql = "SELECT * FROM `anamnesis` WHERE `checkup_id` = $row[checkup_id]";
+						$flds = $dbInst->query($sql);
+						if(!empty($flds)) {
+							foreach ($flds as $fld) {
+								$sql = generateInsertSql($fld, 'anamnesis', array('anamnesis_id'), array('worker_id' => $worker_id, 'firm_id' => $firm_id, 'checkup_id' => $checkup_id));
+								$dbInst->query($sql);
+							}
+						}
+
+						//lab_checkups
+						$sql = "SELECT * FROM `lab_checkups` WHERE `checkup_id` = $row[checkup_id]";
+						$flds = $dbInst->query($sql);
+						if(!empty($flds)) {
+							foreach ($flds as $fld) {
+								$sql = generateInsertSql($fld, 'lab_checkups', array('lab_checkup_id'), array('worker_id' => $worker_id, 'firm_id' => $firm_id, 'checkup_id' => $checkup_id));
+								$dbInst->query($sql);
+							}
+						}
+
+						//family_diseases
+						$sql = "SELECT * FROM `family_diseases` WHERE `checkup_id` = $row[checkup_id]";
+						$flds = $dbInst->query($sql);
+						if(!empty($flds)) {
+							foreach ($flds as $fld) {
+								$sql = generateInsertSql($fld, 'family_diseases', array('disease_id'), array('worker_id' => $worker_id, 'firm_id' => $firm_id, 'checkup_id' => $checkup_id));
+								$dbInst->query($sql);
+							}
+						}
+						//medical_checkups_doctors
+						$sql = "SELECT * FROM `medical_checkups_doctors` WHERE `checkup_id` = $row[checkup_id]";
+						$flds = $dbInst->query($sql);
+						if(!empty($flds)) {
+							foreach ($flds as $fld) {
+								$sql = generateInsertSql($fld, 'medical_checkups_doctors', array(), array('checkup_id' => $checkup_id));
+								$dbInst->query($sql);
+							}
+						}
+						
+						//medical_checkups_doctors2 
+						$sql = "SELECT * FROM `medical_checkups_doctors2` WHERE `checkup_id` = $row[checkup_id]";
+						$flds = $dbInst->query($sql);
+						if(!empty($flds)) {
+							foreach ($flds as $fld) {
+								$sql = generateInsertSql($fld, 'medical_checkups_doctors2', array(), array('checkup_id' => $checkup_id));
+								$dbInst->query($sql);
+							}
+						}
+					}
+					
+					//4). Copy Предв. прегледи
+					$sql = "SELECT * FROM `medical_precheckups` WHERE `worker_id` = $src_worker_id";
+					$rows = $dbInst->query($sql);
+					if(!empty($rows)) {
+						foreach ($rows as $row) {
+							$sql = generateInsertSql($row, 'medical_precheckups', array('precheckup_id'), array('worker_id' => $worker_id, 'firm_id' => $firm_id));
+							$precheckup_id = $dbInst->query($sql);
+							//medical_precheckups_doctors2
+							$sql = "SELECT * FROM `medical_precheckups_doctors2` WHERE `precheckup_id` = $row[precheckup_id]";
+							$flds = $dbInst->query($sql);
+							if(!empty($flds)) {
+								foreach ($flds as $fld) {
+									$sql = generateInsertSql($fld, 'medical_precheckups_doctors2', array('prchk_id'), array('worker_id' => $worker_id, 'precheckup_id' => $precheckup_id));
+									$dbInst->query($sql);
+								}
+							}
+							//prchk_diagnosis
+							$sql = "SELECT * FROM `prchk_diagnosis` WHERE `precheckup_id` = $row[precheckup_id]";
+							$flds = $dbInst->query($sql);
+							if(!empty($flds)) {
+								foreach ($flds as $fld) {
+									$sql = generateInsertSql($fld, 'prchk_diagnosis', array('prchk_id'), array('worker_id' => $worker_id, 'precheckup_id' => $precheckup_id));
+									$dbInst->query($sql);
+								}
+							}
+						}
+						$dbInst->processLastPrchkCheckup($worker_id);
+					}
+					
+					$passed++;
+				}
+				$ret['data']['passed'] = $passed;
+				die(json_encode($ret));
+			}
+			die(json_encode($ret));
+	}
+}
+
+function generateInsertSql($row = array(), $table = '', $removeCols = array(), $replaceCols = array()) {
+	global $dbInst;
+	$flds = array();
+	foreach ($row as $key => $val) {
+		if(!is_numeric($key)) {
+			if(in_array($key, $removeCols)) continue;
+			if(isset($replaceCols[$key])) $val = $replaceCols[$key];
+			if(null === $val) $val = '';
+			$flds[$key] = "'".$dbInst->checkStr($val)."'";
+		}
+	}
+	
+	if ('family_diseases' == $table) {
+		file_put_contents('debugg.txt', "INSERT INTO `{$table}` ( ".implode(', ', array_keys($flds))." ) VALUES ( ".implode(', ', array_values($flds))." )", FILE_APPEND);
+	}
+	
+	return "INSERT INTO `{$table}` ( ".implode(', ', array_keys($flds))." ) VALUES ( ".implode(', ', array_values($flds))." )";
+}
+
 if(isset($_POST['ajax_action']) && !strcmp($_POST['ajax_action'], 'update_progroup')) {
 	$position_name = (isset($_POST['position_name'])) ? $dbInst->checkStr($_POST['position_name']) : '';
 	$progroup = (isset($_POST['progroup'])) ? intval($_POST['progroup']) : '0';
@@ -672,9 +866,12 @@ function echoWorkers($firm_id)
               </tr>
             </table>
           </div>
-          <table id="listtable">
+      <table cellpadding="0" cellspacing="0" summary="" style="width: 100%;">
+		<tr>
+          <td><table id="listtable">
             <tbody>
               <tr>
+              	<th>&nbsp;</th>
                 <th><?php if (isset($_GET["sort_by"]) && $_GET["sort_by"] == "fname") { ?><img src="img/<?php if (isset($_GET["order"]) && $_GET["order"] == "DESC") { ?>sort_arrow_down.gif<?php } else { ?>sort_arrow_up.gif<?php } ?>" alt="Sort" width="16" height="16" border="0" /><?php } ?><a href="<?= basename($_SERVER['PHP_SELF']) . cleanQueryString('sort_by=fname&order=' . ((isset($_GET["sort_by"]) && $_GET["sort_by"] == "fname") ? (($_GET["order"] == "DESC") ? "ASC" : "DESC") : "ASC")) ?>" title="Сортиране по име">Име</a></th>
                 <th><?php if (isset($_GET["sort_by"]) && $_GET["sort_by"] == "sname") { ?><img src="img/<?php if (isset($_GET["order"]) && $_GET["order"] == "DESC") { ?>sort_arrow_down.gif<?php } else { ?>sort_arrow_up.gif<?php } ?>" alt="Sort" width="16" height="16" border="0" /><?php } ?><a href="<?= basename($_SERVER['PHP_SELF']) . cleanQueryString('sort_by=sname&order=' . ((isset($_GET["sort_by"]) && $_GET["sort_by"] == "sname") ? (($_GET["order"] == "DESC") ? "ASC" : "DESC") : "ASC")) ?>" title="Сортиране по презиме">Презиме</a></th>
                 <th><?php if (isset($_GET["sort_by"]) && $_GET["sort_by"] == "lname") { ?><img src="img/<?php if (isset($_GET["order"]) && $_GET["order"] == "DESC") { ?>sort_arrow_down.gif<?php } else { ?>sort_arrow_up.gif<?php } ?>" alt="Sort" width="16" height="16" border="0" /><?php } ?><a href="<?= basename($_SERVER['PHP_SELF']) . cleanQueryString('sort_by=lname&order=' . ((isset($_GET["sort_by"]) && $_GET["sort_by"] == "lname") ? (($_GET["order"] == "DESC") ? "ASC" : "DESC") : "ASC")) ?>" title="Сортиране по фамилия">Фамилия</a></th>
@@ -741,6 +938,7 @@ function echoWorkers($firm_id)
               		$row['checkups_num'] = (isset($aPatientCheckups[$row['worker_id']])) ? $aPatientCheckups[$row['worker_id']] : 0;
 					?>
               <tr>
+              	<td><input type="checkbox" id="chkworker_<?=$row['worker_id']?>" name="chkworker_<?=$row['worker_id']?>" value="<?=$row['worker_id']?>" /></td>
                 <td align="left"><a id="w_fname_<?=$row['worker_id']?>" href="popup_worker.php?worker_id=<?=$row['worker_id']?>&amp;firm_id=<?=$firm_id?>&amp;<?=SESS_NAME.'='.session_id()?>" title="Редактиране на данните на <?=HTMLFormat($row['fname'].' '.$row['lname'].', ЕГН '.$row['egn'])?>" class="workerinfo"><?= (($row['date_retired'] != '') ? '<img src="img/caution.gif" alt="retired" width="11" height="11" border="0" title="Напуснал на ' . $row['date_retired_h'] . '" /> ' : '') ?><?=$row['fname']?></a></td>
                 <td align="left"><a id="w_sname_<?=$row['worker_id']?>" href="popup_worker.php?worker_id=<?=$row['worker_id']?>&amp;firm_id=<?=$firm_id?>&amp;<?=SESS_NAME.'='.session_id()?>" title="Редактиране на данните на <?=HTMLFormat($row['fname'].' '.$row['lname'].', ЕГН '.$row['egn'])?>" class="workerinfo"><?= $row['sname'] ?></a></td>
                 <td align="left"><a id="w_lname_<?=$row['worker_id']?>" href="popup_worker.php?worker_id=<?=$row['worker_id']?>&amp;firm_id=<?=$firm_id?>&amp;<?=SESS_NAME.'='.session_id()?>" title="Редактиране на данните на <?=HTMLFormat($row['fname'].' '.$row['lname'].', ЕГН '.$row['egn'])?>" class="workerinfo"><?= $row['lname'] ?></a></td>
@@ -763,20 +961,35 @@ function echoWorkers($firm_id)
               } else {
 				?>
               <tr>
-                <td colspan="14">Няма намерени резултати.</td>
+                <td colspan="15">Няма намерени резултати.</td>
               </tr>
               <?php } ?>
               <tr class="notover">
-                <td colspan="14">&nbsp;</td>
+                <td colspan="15">&nbsp;</td>
               </tr>
               <!--<tr class="notover">
                 <td colspan="7"><strong>Покажи </strong><input type="text" id="perPage" name="perPage" value="<?= $perPage ?>" size="5" maxlength="10" onKeyPress="return numbersonly(this, event);" /> <strong>работещи на страница</strong></td>
               </tr>-->
               <tr>
-                <th colspan="14" align="center"><input type="button" id="btnSubmit" name="btnSubmit" value="Нов работещ" class="nicerButtons" /></th>
+                <th colspan="15" align="center"><input type="button" id="btnSubmit" name="btnSubmit" value="Нов работещ" class="nicerButtons" /></th>
               </tr>
             </tbody>
           </table>
+        </td>
+	  </tr>
+	  <?php if (is_array($workers) && count($workers) > 0) : ?>
+	  <tr>
+	    <td align="left" style="padding-bottom: 6px;"><img width="38" height="22" alt="With selected:" src="img/arrow_ltr.png" class="selectallarrow" /> 
+		    <a id="lnkCheckAll" href="#">Маркирай </a> / <a id="lnkUncheckAll" href="#">Размаркирай всички</a>
+		    &nbsp;&nbsp;&nbsp;
+		    <select id="withSelected" name="withSelected">
+		      <option selected="selected" value="">На избраните:</option>
+		      <option value="copy_medical_info">Копирай медицинската информация</option>
+		    </select><span id="srcFirmWrap"></span>
+    	</td>
+	  </tr>
+	  <?php endif; ?>
+	</table>
           <div id="actionsdiv">
             <table width="100%" border="0">
               <tr>
@@ -856,6 +1069,136 @@ function echoWorkers($firm_id)
       	$('#preLoader').show();
       	return true;
       }
+      
+      var ajax_endpoint = '<?= $_SERVER['PHP_SELF'] . '?' . $_SERVER['QUERY_STRING'] ?>';
+      
+      $(function(){
+      	$('#lnkCheckAll').bind('click', function(e){
+      		e.preventDefault();
+      		$('input[id^="chkworker_"]').attr('checked', 'checked');
+      	});
+      	
+      	$('#lnkUncheckAll').bind('click', function(e){
+      		e.preventDefault();
+      		$('input[id^="chkworker_"]').removeAttr('checked');
+      	});
+
+      	$('#withSelected').bind('change', function(e){
+      		var withSelected = $.trim($(this).val());
+
+      		if($(this).val() == '') {
+      			$('#srcFirmWrap').html('');
+      			return false;
+      		}
+
+      		if(!$('input[id^="chkworker_"]:checked').length) {
+      			alert('Моля, изберете работещи.');
+      			$(this).val('');
+      			return false;
+      		}
+
+      		if(withSelected == 'copy_medical_info') {
+      			$.ajax({
+      				type: 'post',
+      				url: ajax_endpoint,
+      				dataType: 'json',
+      				data: { ajax_req: 'load_src_firms' },
+      				beforeSend: function(jqXHR, settings) {
+      					$('#srcFirmWrap').html('зареждане...');
+      					DisableEnableForm(true);
+      				}, // End beforeSend
+      				success: function(data, textStatus, jqXHR) {
+      					if(!data) {
+      						alert('Няма връзка със сървъра.');
+      					} else if (data.code == 0) {
+      						var content = data.data['content'];
+      						$('#srcFirmWrap').html(content);
+      					} else {
+      						alert(data.message);
+      					}
+      				}, // End success
+      				error: function(request, error) {
+      					var errmsg = '';
+      					if (error == "timeout") errmsg = "The request timed out";
+      					else errmsg = "ERROR: " + error;
+      					if (errmsg != '') $('#errmsg').html(errmsg);
+      				}, // End error
+      				complete: function(jqXHR, textStatus){
+      					DisableEnableForm(false);
+      				}
+      			});
+      		}
+      	});
+
+      	$('#btnCopyMedInfo').live('click', function(e){
+      		e.preventDefault();
+      		var checked = $('input[id^="chkworker_"]:checked').length;
+      		if(!checked) {
+      			alert('Моля, изберете работещи.');
+      			return false;
+      		}
+      		var src_firm_id = $('#src_firm_id').val();
+      		if(src_firm_id == '') {
+      			alert('Моля, изберете фирма, от която да копирате медицинска информация.');
+      			$('#src_firm_id').focus();
+      			return false;
+      		}
+      		var wIDs = '';
+      		$('input[id^="chkworker_"]:checked').each(function(i){
+      			var worker_id = $(this).attr('id').split('_')[1];
+      			wIDs += worker_id + ',';
+      		});
+      		if(wIDs != '') {
+      			wIDs = wIDs.substring(0, wIDs.length-1);
+      		}
+      		var srcFirm = $.trim($('#src_firm_id')[0].options[$('#src_firm_id')[0].selectedIndex].text);
+      		var confirmMsg = 'Наистина ли искате да копирате медицинската информация за ';
+      		confirmMsg += (checked == 1) ? 'избрания пациент' : 'избраните пациенти';
+      		confirmMsg += ' от ' + srcFirm + '?';
+
+      		if(confirm(confirmMsg)) {
+      			$.ajax({
+      				type: 'post',
+      				url: ajax_endpoint,
+      				dataType: 'json',
+      				data: { ajax_req: 'copy_medical_info', wIDs: wIDs, src_firm_id: src_firm_id },
+      				beforeSend: function(jqXHR, settings) {
+      					$.blockUI({
+      						message: '<h3><img src="img/loader.gif" alt="" \/> Копиране...<\/h3>',
+      						css: {
+      							border: 'none',
+      							padding: '15px',
+      							backgroundColor: '#000',
+      							'-webkit-border-radius': '10px',
+      							'-moz-border-radius': '10px',
+      							opacity: .5,
+      							color: '#fff'
+      						}
+      					});
+      				}, // End beforeSend
+      				success: function(data, textStatus, jqXHR) {
+      					if(!data) {
+      						alert('Няма връзка със сървъра.');
+      					} else if (data.code == 0) {
+      						alert('Медицинската информация на ' + data.data['passed'] + ' от ' + checked + ' избрани пациенти бе успешно копирана от фирма ' + srcFirm + '.');
+      						window.location = ajax_endpoint;
+      					} else {
+      						alert(data.message);
+      					}
+      				}, // End success
+      				error: function(request, error) {
+      					var errmsg = '';
+      					if (error == "timeout") errmsg = "The request timed out";
+      					else errmsg = "ERROR: " + error;
+      					if (errmsg != '') $('#errmsg').html(errmsg);
+      				}, // End error
+      				complete: function(jqXHR, textStatus){
+      					$.unblockUI();
+      				}
+      			});
+      		}
+      	});
+      });
       //]]>
       </script>
       <h2>Въвеждане на работещи от Excel файл</h2>
@@ -1113,6 +1456,7 @@ EOT;
 } elseif ($tab == 'workers') {
 	ob_start();
 	?>
+<script type="text/javascript" src="js/jquery.blockUI.js"></script>
 <script type="text/javascript">
 //<![CDATA[
 $(document).ready(function(){
