@@ -1323,3 +1323,35 @@ function fixMkbCode($mkb_id = '') {
 	$good = array('A', 'B', 'C', 'E', 'K', 'M', 'O', 'P', 'T', 'X', '3', '0', '', '.', '', '');
 	return str_replace($bad, $good, $mkb_id);
 }
+
+function short_text($text,$length) {
+	$maxTextLenght=$length;
+	$aspace=" ";
+	if(strlen($text) > $maxTextLenght )
+	{
+		$text = substr(trim($text),0,$maxTextLenght);
+		$text = substr($text,0,strlen($text)-strpos(strrev($text),$aspace));
+		$text = $text.'...';
+	}
+	return $text;
+}
+
+function generateFileName($firm_name = '', $filename_start = 'Spisak_', $file_ext = 'doc') {
+	$firm_name = str_replace(' ', '_', trim($firm_name));
+	$firm_name = str_replace('"', '', $firm_name);
+	$firm_name = str_replace('“', '', $firm_name);
+	$firm_name = str_replace('\'', '', $firm_name);
+	$firm_name = str_replace('”', '', $firm_name);
+	$firm_name = str_replace('„', '', $firm_name);
+	$firm_name = str_replace('_-_', '_', $firm_name);
+	$firm_name = str_replace(',', '', $firm_name);
+	$firm_name = str_replace(';', '', $firm_name);
+
+	require_once("cyrlat.class.php");
+	$cyrlat = new CyrLat;
+	$filename = $filename_start.$cyrlat->cyr2lat($firm_name);
+	$filename = short_text($filename, 50);
+	if(!empty($file_ext)) $filename .= '.'.$file_ext;
+
+	return $filename;
+}
