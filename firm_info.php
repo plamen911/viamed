@@ -871,7 +871,7 @@ function echoWorkers($firm_id)
           <td><table id="listtable">
             <tbody>
               <tr>
-              	<th>&nbsp;</th>
+              	<th style="display: none;">&nbsp;</th>
                 <th><?php if (isset($_GET["sort_by"]) && $_GET["sort_by"] == "fname") { ?><img src="img/<?php if (isset($_GET["order"]) && $_GET["order"] == "DESC") { ?>sort_arrow_down.gif<?php } else { ?>sort_arrow_up.gif<?php } ?>" alt="Sort" width="16" height="16" border="0" /><?php } ?><a href="<?= basename($_SERVER['PHP_SELF']) . cleanQueryString('sort_by=fname&order=' . ((isset($_GET["sort_by"]) && $_GET["sort_by"] == "fname") ? (($_GET["order"] == "DESC") ? "ASC" : "DESC") : "ASC")) ?>" title="Сортиране по име">Име</a></th>
                 <th><?php if (isset($_GET["sort_by"]) && $_GET["sort_by"] == "sname") { ?><img src="img/<?php if (isset($_GET["order"]) && $_GET["order"] == "DESC") { ?>sort_arrow_down.gif<?php } else { ?>sort_arrow_up.gif<?php } ?>" alt="Sort" width="16" height="16" border="0" /><?php } ?><a href="<?= basename($_SERVER['PHP_SELF']) . cleanQueryString('sort_by=sname&order=' . ((isset($_GET["sort_by"]) && $_GET["sort_by"] == "sname") ? (($_GET["order"] == "DESC") ? "ASC" : "DESC") : "ASC")) ?>" title="Сортиране по презиме">Презиме</a></th>
                 <th><?php if (isset($_GET["sort_by"]) && $_GET["sort_by"] == "lname") { ?><img src="img/<?php if (isset($_GET["order"]) && $_GET["order"] == "DESC") { ?>sort_arrow_down.gif<?php } else { ?>sort_arrow_up.gif<?php } ?>" alt="Sort" width="16" height="16" border="0" /><?php } ?><a href="<?= basename($_SERVER['PHP_SELF']) . cleanQueryString('sort_by=lname&order=' . ((isset($_GET["sort_by"]) && $_GET["sort_by"] == "lname") ? (($_GET["order"] == "DESC") ? "ASC" : "DESC") : "ASC")) ?>" title="Сортиране по фамилия">Фамилия</a></th>
@@ -938,7 +938,7 @@ function echoWorkers($firm_id)
               		$row['checkups_num'] = (isset($aPatientCheckups[$row['worker_id']])) ? $aPatientCheckups[$row['worker_id']] : 0;
 					?>
               <tr>
-              	<td><input type="checkbox" id="chkworker_<?=$row['worker_id']?>" name="chkworker_<?=$row['worker_id']?>" value="<?=$row['worker_id']?>" /></td>
+              	<td style="display: none;"><input type="checkbox" id="chkworker_<?=$row['worker_id']?>" name="chkworker_<?=$row['worker_id']?>" value="<?=$row['worker_id']?>" /></td>
                 <td align="left"><a id="w_fname_<?=$row['worker_id']?>" href="popup_worker.php?worker_id=<?=$row['worker_id']?>&amp;firm_id=<?=$firm_id?>&amp;<?=SESS_NAME.'='.session_id()?>" title="Редактиране на данните на <?=HTMLFormat($row['fname'].' '.$row['lname'].', ЕГН '.$row['egn'])?>" class="workerinfo"><?= (($row['date_retired'] != '') ? '<img src="img/caution.gif" alt="retired" width="11" height="11" border="0" title="Напуснал на ' . $row['date_retired_h'] . '" /> ' : '') ?><?=$row['fname']?></a></td>
                 <td align="left"><a id="w_sname_<?=$row['worker_id']?>" href="popup_worker.php?worker_id=<?=$row['worker_id']?>&amp;firm_id=<?=$firm_id?>&amp;<?=SESS_NAME.'='.session_id()?>" title="Редактиране на данните на <?=HTMLFormat($row['fname'].' '.$row['lname'].', ЕГН '.$row['egn'])?>" class="workerinfo"><?= $row['sname'] ?></a></td>
                 <td align="left"><a id="w_lname_<?=$row['worker_id']?>" href="popup_worker.php?worker_id=<?=$row['worker_id']?>&amp;firm_id=<?=$firm_id?>&amp;<?=SESS_NAME.'='.session_id()?>" title="Редактиране на данните на <?=HTMLFormat($row['fname'].' '.$row['lname'].', ЕГН '.$row['egn'])?>" class="workerinfo"><?= $row['lname'] ?></a></td>
@@ -978,7 +978,8 @@ function echoWorkers($firm_id)
         </td>
 	  </tr>
 	  <?php if (is_array($workers) && count($workers) > 0) : ?>
-	  <tr>
+	  <!-- Temp. hide this functionality - there is a link below to transfer medical info from other firms -->
+	  <tr style="display: none;">
 	    <td align="left" style="padding-bottom: 6px;"><img width="38" height="22" alt="With selected:" src="img/arrow_ltr.png" class="selectallarrow" /> 
 		    <a id="lnkCheckAll" href="#">Маркирай </a> / <a id="lnkUncheckAll" href="#">Размаркирай всички</a>
 		    &nbsp;&nbsp;&nbsp;
@@ -1043,6 +1044,9 @@ function echoWorkers($firm_id)
               </tr>
               <tr>
                 <td><a class="workerinfo" href="transfer_medical_info.php?firm_id=<?=$firm_id?>&<?=SESS_NAME.'='.session_id()?>"><img width="16" border="0" height="16" alt="download" src="img/download2.gif" title="Прехвърляне на медицинска информация от други фирми" /> Прехвърляне на медицинска информация от други фирми</a></td>
+              </tr>
+              <tr>
+                <td><a href="xl_workers_mockup.php?firm_id=<?=$firm_id?>&<?=SESS_NAME.'='.session_id()?>"><img width="16" border="0" height="16" alt="download" src="img/download2.gif" title="Макет на Excel файл - работещи" /> Макет на Excel файл - работещи</a></td>
               </tr>
             </table>
             <script type="text/javascript">

@@ -364,7 +364,7 @@ if(!empty($f['prchk_date2'])) {
 		}
 	}
 
-	$sql = "SELECT d.*, m.mkb_desc, m.mkb_code, p.doctor_pos_name, p.alias
+	$sql = "SELECT d.*, m.mkb_desc, m.mkb_code, p.doctor_pos_name
 			FROM prchk_diagnosis d
 			LEFT JOIN mkb m ON (m.mkb_id = d.mkb_id)
 			LEFT JOIN cfg_doctor_positions p ON (p.doctor_pos_id = d.published_by)

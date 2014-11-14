@@ -53,7 +53,7 @@ if($s['license_num'] != '') {
 
 $sect->addEmptyParagraph(new PHPRtfLite_Font(1, 'Times new Roman'), $parBlack);
 */
-$sect->addEmptyParagraph();
+//$sect->addEmptyParagraph();
 $sect->addEmptyParagraph();
 
 function fnGenerateTable($data = array(), $colWidts = array(), $colAligns = array(), $tableType = 'nosology', &$table = null) {
