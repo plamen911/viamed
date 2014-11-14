@@ -169,12 +169,10 @@ if(isset($_POST['ajax_req'])) {
 						}
 						$dbInst->processLastPrchkCheckup($worker_id);
 					}
-					
-					$passed++;
 				}
-				$ret['data']['passed'] = $passed;
-				die(json_encode($ret));
+				$passed++;
 			}
+			$ret['data']['passed'] = $passed;
 			die(json_encode($ret));
 	}
 }
@@ -189,10 +187,6 @@ function generateInsertSql($row = array(), $table = '', $removeCols = array(), $
 			if(null === $val) $val = '';
 			$flds[$key] = "'".$dbInst->checkStr($val)."'";
 		}
-	}
-	
-	if ('family_diseases' == $table) {
-		file_put_contents('debugg.txt', "INSERT INTO `{$table}` ( ".implode(', ', array_keys($flds))." ) VALUES ( ".implode(', ', array_values($flds))." )", FILE_APPEND);
 	}
 	
 	return "INSERT INTO `{$table}` ( ".implode(', ', array_keys($flds))." ) VALUES ( ".implode(', ', array_values($flds))." )";
