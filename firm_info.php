@@ -24,6 +24,8 @@ if(isset($_POST['ajax_req'])) {
 			die(json_encode($ret));
 			
 		case 'copy_medical_info':
+			ini_set('memory_limit', '128M');
+			set_time_limit(600);
 			//data sanitization
 			$wIDs = (isset($_POST['wIDs']) && !empty($_POST['wIDs']) && $ary = explode(',', $_POST['wIDs'])) ? $ary : array();
 			if(empty($wIDs)) {
@@ -1175,7 +1177,7 @@ function echoWorkers($firm_id)
       				}, // End beforeSend
       				success: function(data, textStatus, jqXHR) {
       					if(!data) {
-      						alert('Няма връзка със сървъра.');
+      						alert('Няма връзка със сървъра (Status: ' + textStatus + ').');
       					} else if (data.code == 0) {
       						alert('Медицинската информация на ' + data.data['passed'] + ' от ' + checked + ' избрани пациенти бе успешно копирана от фирма ' + srcFirm + '.');
       						window.location = ajax_endpoint;
