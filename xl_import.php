@@ -44,13 +44,15 @@ if(isset($_POST['btnImport']) && $_FILES['datafile']['tmp_name']) {
 			}*/
 			
 			$oldEGNs = array();
+			$oldMapIDs = array();
 			$oldPChDates = array();
 			if($tab == 'workers') {
 				// Insert workers that don't exist, based on EGN
-				$flds = $dbInst->query("SELECT `worker_id`, `egn` FROM `workers` WHERE `firm_id` = $firm_id");
+				$flds = $dbInst->query("SELECT `worker_id`, `egn`, map_id FROM `workers` WHERE `firm_id` = $firm_id");
 				if(!empty($flds)) {
 					foreach ($flds as $fld) {
 						$oldEGNs[$fld['egn']] = $fld['worker_id'];
+						$oldMapIDs[$fld['worker_id']] = $fld['map_id'];
 					}
 				}
 			} else {
@@ -77,7 +79,7 @@ if(isset($_POST['btnImport']) && $_FILES['datafile']['tmp_name']) {
 
 				if($tab == 'charts') {
 					// Import patient charts
-					if(isset($row[0])) { $r['egn'] = $row[0]; } else continue;
+					if(isset($row[0])) { $r['egn'] = strval($row[0]); } else continue;
 					if(isset($row[2])) { $r['chart_num'] = $row[2]; } else continue;
 					if(isset($row[3])) { $r['medical_types'] = (!empty($row[3])) ? serialize(array(strval($row[3]))) : ''; } else continue;
 					if('a:1:{i:0;i:1;}' == $r['medical_types']) $r['medical_types'] = 'a:1:{i:0;s:1:"1";}';
@@ -204,7 +206,7 @@ if(isset($_POST['btnImport']) && $_FILES['datafile']['tmp_name']) {
 					$r['lname'] = '';
 
 					if(isset($row[0])) {
-						$egn = $row[0];
+						$egn = strval($row[0]);
 						if(preg_match('/^[0-9]{10}$/', $egn)) {
 							$y = substr($egn, 0, 2);
 							$m = substr($egn, 2, 2);
@@ -275,6 +277,51 @@ if(isset($_POST['btnImport']) && $_FILES['datafile']['tmp_name']) {
 						$worker_id = $dbInst->query($sql);
 					} else {
 						$worker_id = $oldEGNs[$r['egn']];
+						
+						// Oooops! There is a work position change - move old data to `pro_route` table
+						if ($oldMapIDs[$worker_id] != $r['map_id']) {
+							$sql = "SELECT f.name AS firm_name,
+									s.subdivision_name AS subdivision_name,
+									p.wplace_name AS wplace_name,
+									i.position_name AS position_name,
+									w.date_curr_position_start AS date_curr_position_start,
+									w.date_retired AS date_retired
+									FROM workers w
+									LEFT JOIN firms f ON (f.firm_id = w.firm_id)
+									LEFT JOIN firm_struct_map m ON (m.map_id = w.map_id)
+									LEFT JOIN subdivisions s ON (s.subdivision_id = m.subdivision_id)
+									LEFT JOIN work_places p ON (p.wplace_id = m.wplace_id)
+									LEFT JOIN firm_positions i ON (i.position_id = m.position_id)
+									WHERE w.worker_id = $worker_id";
+							$res = $dbInst->fnSelectSingleRow($sql);
+							if ($res) {
+								$firm_name = (!empty($res['firm_name'])) ? $dbInst->checkStr($res['firm_name']) : '';
+								$subdivision_name = (!empty($res['subdivision_name'])) ? $dbInst->checkStr($res['subdivision_name']) : '';
+								$wplace_name = (!empty($res['wplace_name'])) ? $dbInst->checkStr($res['wplace_name']) : '';
+								$position_name = (!empty($res['position_name'])) ? $dbInst->checkStr($res['position_name']) : '';
+								$date_curr_position_start = (!empty($res['date_curr_position_start']) && '0000-00-00 00:00:00' != $res['date_curr_position_start']) ? $res['date_curr_position_start'] : '';
+								$date_retired = (!empty($res['date_retired']) && '0000-00-00 00:00:00' != $res['date_retired']) ? $res['date_retired'] : date('Y-n-j');
+								$exp_length_y = $exp_length_m = '';
+								if (!empty($date_curr_position_start) && preg_match('/^(\d{4})\-(\d{2})-(\d{2})/', $date_curr_position_start, $matches)) {
+									$y2 = intval($matches[1]);
+									$m2 = intval($matches[2]);
+									$d2 = intval($matches[3]);
+									if (!empty($date_retired) && preg_match('/^(\d{4})\-(\d{2})-(\d{2})/', $date_retired, $matches)) {
+										$y1 = intval($matches[1]);
+										$m1 = intval($matches[2]);
+										$d1 = intval($matches[3]);
+									} else {
+										list($y1, $m1, $d1) = explode('-', date('Y-n-j'));
+									}
+									$t = new timespan(mktime(0, 0, 0, $m1, $d1, $y1), mktime(0, 0, 0, $m2, $d2, $y2));
+									$exp_length_y = $t->years;
+									$exp_length_m = $t->months;
+								}
+								$sql = "INSERT INTO pro_route (worker_id, firm_name, `position`, exp_length_y, exp_length_m) VALUES ($worker_id, '$firm_name / $subdivision_name', '$position_name / $wplace_name', '$exp_length_y', '$exp_length_m')";
+								$dbInst->query($sql);
+							}
+						}
+						
 						$sql = "UPDATE `workers` SET ";
 						foreach ($r as $key => $val) { $sql .= "`$key` = '$val',"; }
 						$sql = substr($sql, 0, -1);

@@ -448,7 +448,7 @@ function echoProRoute($worker_id) {
             if(isset($rows)) {
             foreach ($rows as $row) { ?>
             <tr>
-              <td><input type="text" id="firm_name_<?=$row['route_id']?>" name="firm_name_<?=$row['route_id']?>" value="<?=HTMLFormat($row['firm_name'])?>" size="52" maxlength="100" /></td>
+              <td><input type="text" id="firm_name_<?=$row['route_id']?>" name="firm_name_<?=$row['route_id']?>" value="<?=HTMLFormat($row['firm_name'])?>" size="46" maxlength="100" /></td>
               <td><input type="text" id="position_<?=$row['route_id']?>" name="position_<?=$row['route_id']?>" value="<?=HTMLFormat($row['position'])?>" size="50" maxlength="80" /></td>
               <td align="center"><input type="text" id="exp_length_y_<?=$row['route_id']?>" name="exp_length_y_<?=$row['route_id']?>" size="2" maxlength="2" value="<?=HTMLFormat($row['exp_length_y'])?>" onkeypress="return numbersonly(this, event);" />
                 г.
@@ -460,7 +460,7 @@ function echoProRoute($worker_id) {
             </tr>
             <?php }} ?>
             <tr>
-              <td><input type="text" id="firm_name_0" name="firm_name_0" value="" size="52" maxlength="100" class="newItem" /></td>
+              <td><input type="text" id="firm_name_0" name="firm_name_0" value="" size="46" maxlength="100" class="newItem" /></td>
               <td><input type="text" id="position_0" name="position_0" value="" size="50" maxlength="80" class="newItem" /></td>
               <td align="center"><input type="text" id="exp_length_y_0" name="exp_length_y_0" size="2" maxlength="2" value="" onkeypress="return numbersonly(this, event);" class="newItem" />
                 г.
