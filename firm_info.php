@@ -1025,16 +1025,16 @@ function echoWorkers($firm_id)
               </tr>
               <tr>
                 <td><?php
-                $ownersPerExport = 200;
+                $ownersPerExport = 100;
                 $cnt = $dbInst->fnCountRow('workers', "firm_id = $firm_id");
                 if($cnt > $ownersPerExport) {
-                ?><a href="javascript:void(0);" onclick="window.location.href='w_data_export.php?firm_id=<?=$firm_id?>&page='+$('#archiveParts').val()+'&limit=<?=$ownersPerExport?>';" title="Пренос на данни на фирмата"><img width="16" border="0" height="16" alt="download" src="img/download2.gif" /> Пренос на данни на фирмата</a> <select id="archiveParts" name="archiveParts">
+                ?><a id="lnkDataExport" href="javascript:void(0);" onclick="window.location.href='w_data_export.php?firm_id=<?=$firm_id?>&page='+$('#archiveParts').val()+'&limit=<?=$ownersPerExport?>';" title="Пренос на данни на фирмата"><img width="16" border="0" height="16" alt="download" src="img/download2.gif" /> Пренос на данни на фирмата</a> <select id="archiveParts" name="archiveParts">
                   <?php
                   for ($i = 1, $j = 1; $i <= $cnt; $i += $ownersPerExport, $j++) { echo '<option value="'.$j.'">Том '.$j.' &nbsp;</option>'; }
                	  ?>
                 </select> <em>(по не повече от <?=$ownersPerExport?> работещи на том)</em>
                 <?php } else { ?>
-                <a href="w_data_export.php?firm_id=<?=$firm_id?>" title="Пренос на данни на фирмата"><img width="16" border="0" height="16" alt="download" src="img/download2.gif" /> Пренос на данни на фирмата</a>
+                <a id="lnkDataExport" href="w_data_export.php?firm_id=<?=$firm_id?>" title="Пренос на данни на фирмата"><img width="16" border="0" height="16" alt="download" src="img/download2.gif" /> Пренос на данни на фирмата</a>
                 <?php } ?></td>
               </tr>
               <tr>

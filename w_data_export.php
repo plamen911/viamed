@@ -2,6 +2,9 @@
 // http://localhost/stm2008/hipokrat/w_data_export.php?worker_id=51992
 require('includes.php');
 
+set_time_limit(600);
+ini_set('memory_limit', '256M');
+
 // Based on: http://www.phpclasses.org/package/3776-PHP-Template-engine-based-on-real-HTML-tag-replacement.html
 require("templatehtml.class.php");
 // Create the template object
@@ -110,6 +113,8 @@ if(!empty($firm_id)) {
 } else {
 	echo exportWorker($dbInst, $worker_id);
 }
+
+
 
 $templateFooter->showPage();
 
