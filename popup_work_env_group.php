@@ -137,12 +137,13 @@ body, html {
           </tr>
           <!-- new protocol -->
           <tr>
-            <td align="left"><select name="factor_id_0" id="factor_id_0" style="width: 170px;" class="newItem" onchange="xajax_populateValues(this.value,'0');return false;">
+            <td align="left">
+            <select name="factor_id_0" id="factor_id_0" style="width: 170px;" class="newItem" onchange="xajax_populateValues(this.value,'0');return false;">
                 <option value="0">&nbsp;</option>
                 <?php
                   $factors = $dbInst->getFactors();
                   foreach ($factors as $factor) {
-                  	echo '<option value="'.$factor['factor_id'].'"'.(($factor['factor_id']==$row['factor_id'])?' selected="selected"':'').'>'.HTMLFormat($factor['factor_name']).'</option>';
+                  	echo '<option value="' . $factor['factor_id'] . '"' . ((isset($row['factor_id']) && $factor['factor_id'] == $row['factor_id']) ? ' selected="selected"' : '').'>' . HTMLFormat($factor['factor_name']) . '</option>';
                   }
                 ?>
               </select></td>

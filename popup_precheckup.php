@@ -191,6 +191,8 @@ function processPrchkCheckup($aFormValues, $tab='checkups') {
 	}
 
 	$objResponse->assign('sp_cards', 'innerHTML', precheckupPulldown($worker_id, $precheckup_id));
+	
+	$dbInst->processLastPrchkCheckup($worker_id);
 
 	if($isNewPreCheckup) {
 		$sql = "SELECT COUNT(*) AS `cnt` FROM `medical_precheckups` WHERE `worker_id` = $worker_id";

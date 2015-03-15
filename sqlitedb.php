@@ -2231,7 +2231,7 @@ class SqliteDB
 				default:
 					$var_list = array('prchk_anamnesis' => 'prchk_anamnesis', 'prchk_data' =>
 					'prchk_data', 'prchk_conclusion' => 'prchk_conclusion', 'prchk_conditions' =>
-					'prchk_conditions', 'prchk_stm_date' => 'prchk_stm_date');
+					'prchk_conditions', 'prchk_stm_date' => 'prchk_stm_date', 'prchk_date' => 'prchk_date');
 					while (list($var, $param) = @each($var_list)) {
 						if (isset($aFormValues[$param]))
 						$$var = $this->checkStr($aFormValues[$param]);
@@ -2241,6 +2241,7 @@ class SqliteDB
 					$prchk_stm_date = $d->year . '-' . $d->month . '-' . $d->day . ' 00:00:00';
 					else
 					$prchk_stm_date = '';
+					$prchk_date = ($d->Parse($prchk_date)) ? $d->year . '-' . $d->month . '-' . $d->day . ' 00:00:00' : '';
 					if(!$precheckup_id) {
 						$query = "INSERT INTO `medical_precheckups` (`firm_id`, `worker_id`, `prchk_author`, `prchk_date`, `prchk_anamnesis`, `prchk_data`, `prchk_conclusion`, `prchk_conditions`, `prchk_stm_date`, `date_added`, `date_modified`) VALUES ($firm_id, $worker_id, '$prchk_author', '$prchk_date', '$prchk_anamnesis', '$prchk_data', '$prchk_conclusion', '$prchk_conditions', '$prchk_stm_date', datetime('now','localtime'), datetime('now','localtime'))";
 						$precheckup_id = $this->query($query);
