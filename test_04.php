@@ -5,6 +5,7 @@ error_reporting(E_ALL);
 
 $firm_id = 258;
 $IDs = array(27384, 27541);// Албена Стаменова, ЕГН 6806077252
+//$IDs = array(27541);// Албена Стаменова, ЕГН 6806077252
 
 function get_worker_data($dbInst = null, $firm_id = 0, $IDs = array()) {
 	$data = array();
@@ -15,13 +16,14 @@ function get_worker_data($dbInst = null, $firm_id = 0, $IDs = array()) {
 	$data['stm_name_short'] = $dbInst->shortStmName($data['stm_name']);
 	$data['stm_address'] = $s['address'];
 	$data['firm_name'] = preg_replace('/[^A-Za-zА-Яа-я0-9\-_\.]/u', ' ', $firm['firm_name']);
-	$data['location_name'] = $firm['location_name'];
-	$data['address'] = $firm['address'];
+	$data['firm_location'] = $firm['location_name'];
+	$data['firm_address'] = $firm['address'];
 	$data['workers'] = array();
 	
 	if (empty($IDs)) return $data;
 	
 	$chart_types = $dbInst->getChartTypes();
+	$labs = $dbInst->getLabs();
 	
 	$aWorkEnvProtocols = array();
 	$sql = "SELECT m.map_id AS map_id, m.subdivision_id AS subdivision_id, m.wplace_id AS wplace_id,
@@ -44,7 +46,7 @@ function get_worker_data($dbInst = null, $firm_id = 0, $IDs = array()) {
 			$ary['prot_data'] = (($row['pdk_min'] != '') ? $row['pdk_min'] : '') . (($row['pdk_max'] != '') ? ' - '.$row['pdk_max'] : '') . ' ' . $row['factor_dimension'];
 			$ary['prot_date'] = (empty($row['prot_date'])) ? '0000-00-00' : $row['prot_date'];
 			
-			$aWorkEnvProtocols[$row['subdivision_id']][$row['wplace_id']] = $ary;
+			$aWorkEnvProtocols[$row['subdivision_id']][$row['wplace_id']][] = $ary;
 		}
 	}
 	
@@ -175,11 +177,12 @@ function get_worker_data($dbInst = null, $firm_id = 0, $IDs = array()) {
 			$aWorkers[$worker_id]['work_accidents'] = array();
 			$aWorkers[$worker_id]['readjustment_50down'] = array();
 			$aWorkers[$worker_id]['readjustment_50up'] = array();
-			$aWorkers[$worker_id]['vnr'] = array();
+			$aWorkers[$worker_id]['patient_charts'] = array();
 			$aWorkers[$worker_id]['work_env_protocols'] = (isset($aWorkEnvProtocols[$row['subdivision_id']][$row['wplace_id']])) ? $aWorkEnvProtocols[$row['subdivision_id']][$row['wplace_id']] : array();
 			$aWorkers[$worker_id]['wplace_factors_info'] = (isset($aWPlaceFactorsInfo[$row['subdivision_id']][$row['wplace_id']])) ? $aWPlaceFactorsInfo[$row['subdivision_id']][$row['wplace_id']] : array();
 			
 			$aWorkers[$worker_id]['prchk_date2'] = $row['prchk_date2'];
+			$aWorkers[$worker_id]['prchk_stm_date2'] = $row['prchk_stm_date2'];
 			$aWorkers[$worker_id]['prchk_author'] = $row['prchk_author'];
 			$aPrchkConclusions = array();
 			if(!empty($row['prchk_date2'])) {
@@ -205,39 +208,19 @@ function get_worker_data($dbInst = null, $firm_id = 0, $IDs = array()) {
 			}
 			$aWorkers[$worker_id]['prchk_stm_conclusion'] = $stm_conclusion;
 			
-			$aWorkers[$worker_id]['checkup_list'] = array();
+			$aWorkers[$worker_id]['prophylactic_cards'] = array();
 			
 		}
 	}
 	
-	$sql = "SELECT *, strftime('%d.%m.%Y', checkup_date, 'localtime') AS checkup_date_h
-			FROM medical_checkups
-			WHERE worker_id IN (" . implode(',', $IDs) . ")
-			ORDER BY checkup_date DESC, checkup_id DESC";
-	
-	
 	$sql = "SELECT c.*,
 			strftime('%d.%m.%Y', c.checkup_date, 'localtime') AS checkup_date_h,
-			w.*,
-			(SELECT location_name FROM locations WHERE location_id = w.location_id) AS worker_location,
-			strftime('%d.%m.%Y', w.birth_date, 'localtime') AS birth_date2,
-			strftime('%d.%m.%Y', w.date_curr_position_start, 'localtime') AS date_curr_position_start2,
-			strftime('%d.%m.%Y', w.date_career_start, 'localtime') AS date_career_start2,
-			strftime('%d.%m.%Y', w.date_retired, 'localtime') AS date_retired2,
 			strftime('%d.%m.%Y', c.stm_date, 'localtime') AS stm_date2,
-			f.name AS firm_name,
-			l.location_name,
-			s.subdivision_name,
-			p.wplace_name,
-			t.position_name
+			t.position_name AS position_name
 			FROM medical_checkups c
-			LEFT JOIN firms f ON (f.firm_id = c.firm_id)
-			LEFT JOIN locations l ON (l.location_id = f.location_id)
 			LEFT JOIN workers w ON (w.worker_id = c.worker_id)
 			LEFT JOIN firm_struct_map m ON (m.map_id = w.map_id)
-			LEFT JOIN subdivisions s ON (s.subdivision_id = m.subdivision_id)
-			LEFT JOIN work_places p ON (p.wplace_id = m.wplace_id)
-			LEFT JOIN firm_positions t ON(t.position_id = m.position_id)
+			LEFT JOIN firm_positions t ON (t.position_id = m.position_id)
 			WHERE c.worker_id IN (" . implode(',', $IDs) . ")
 			AND w.is_active = '1'
 			ORDER BY c.checkup_date DESC, c.checkup_id DESC";
@@ -272,14 +255,125 @@ function get_worker_data($dbInst = null, $firm_id = 0, $IDs = array()) {
 				}
 			}
 			
+			$ary = array();
+			$ary['checkup_id'] = $row['checkup_id'];
+			$ary['checkup_date_h'] = (empty($row['checkup_date_h'])) ? '--' : $row['checkup_date_h'];
+			$ary['hospitals'] = $hospitals;
+			$ary['doctors'] = $doctors;
+			$ary['EKG'] = $row['EKG'];
+			$ary['x_ray'] = $row['x_ray'];
+			$ary['echo_ray'] = $row['echo_ray'];
+			$ary['left_eye'] = $row['left_eye'];
+			$ary['left_eye2'] = $row['left_eye2'];
+			$ary['right_eye'] = $row['right_eye'];
+			$ary['right_eye2'] = $row['right_eye2'];
+			$ary['VK'] = $row['VK'];
+			$ary['FEO1'] = $row['FEO1'];
+			$ary['tifno'] = $row['tifno'];
+			$ary['hearing_loss'] = $row['hearing_loss'];
+			$ary['left_ear'] = $row['left_ear'];
+			$ary['right_ear'] = $row['right_ear'];
+			$ary['hearing_diagnose'] = $row['hearing_diagnose'];
 			
+			//Фамилна обремененост
+			$ary['fweights_descr'] = (!empty($row['fweights_descr'])) ? HTMLFormat($row['fweights_descr']) : '--';
+			$ary['fweights_list'] = array();
+			$flds = $dbInst->getFamilyWeights($checkup_id);
+			if ($flds) {
+				foreach ($flds as $fld) {
+					$mkb_desc = HTMLFormat($fld['mkb_desc']);
+					if($fld['diagnosis'] != '') {
+						$mkb_desc .= "\n".HTMLFormat($fld['diagnosis']);
+					}
+					$ary['fweights_list'][] = array(
+						'mkb_id' => $fld['mkb_id'],
+						'mkb_desc' => $mkb_desc
+					);
+				}	
+			}
 			
+			$ary['lab_tests'] = array();
+			$flds = $dbInst->getLabCheckups($checkup_id);
+			if ($flds) {
+				foreach ($flds as $fld) {
+					$ary['lab_tests'][] = array(
+						'indicator_name' => $fld['indicator_type'] . ((!empty($fld['indicator_name'])) ? ' (' . $fld['indicator_name'] . ')' : ''),
+						'pdk_min' => $fld['pdk_min'],
+						'pdk_max' => $fld['pdk_max'],
+						'checkup_level' => $fld['checkup_level'],
+						'indicator_dimension' => $fld['indicator_dimension']
+					);
+				}
+			}
 			
+			//Анамнеза
+			$ary['anamnesis_descr'] = (!empty($row['anamnesis_descr'])) ? HTMLFormat($row['anamnesis_descr']) : '--';
+			$ary['anamnesis_list'] = array();
+			$flds = $dbInst->getAnamnesis($checkup_id);
+			if ($flds) {
+				foreach ($flds as $fld) {
+					$mkb_desc = HTMLFormat($fld['mkb_desc']);
+					if($fld['diagnosis'] != '') {
+						$mkb_desc .= "\n" . HTMLFormat($fld['diagnosis']);
+					}
+					$ary['anamnesis_list'][] = array(
+						'mkb_id' => $fld['mkb_id'],
+						'mkb_desc' => $mkb_desc
+					);
+				}
+			}
 			
+			$ary['diagnosis_list'] = array();
+			$flds = $dbInst->getDiseases($checkup_id);
+			if ($flds) {
+				foreach ($flds as $fld) {
+					$mkb_desc = HTMLFormat($fld['mkb_desc']);
+					if(!empty($row['diagnosis'])) {
+						$mkb_desc .= "\n" . HTMLFormat($fld['diagnosis']);
+					}
+					$ary['diagnosis_list'][] = array(
+						'mkb_id' => $fld['mkb_id'],
+						'mkb_desc' => $mkb_desc,
+						'is_new' => ('1' == $fld['is_new']) ? 'да' : 'не'
+					);
+				}
+			}
 			
+			$ary['conclusion_list'] = array();
+			$flds = $dbInst->getDoctorsDesc($checkup_id);
+			if ($flds) {
+				foreach ($flds as $fld) {
+					if($fld['conclusion'] == '') continue;
+					$ary['conclusion_list'][] = $dbInst->my_mb_ucfirst(HTMLFormat($fld['SpecialistName'])) . ': ' . HTMLFormat($fld['conclusion']);
+				}
+			}
+			
+			$stm_conclusion = '';
+			switch ($row['stm_conclusion']) {
+				case '1':
+					$stm_conclusion .= '<b>Може</b> да изпълнява посочената длъжност/професия ' . HTMLFormat($row['position_name']) . ' в ' . HTMLFormat($firm['name']);
+					break;
+				case '2':
+					$stm_conclusion .= '<b>Може</b> да изпълнява посочената длъжност/професия ' . HTMLFormat($row['position_name']) . ' в ' . HTMLFormat($firm['name']) . ' при следните условия: ';
+					break;
+				case '0':
+					$stm_conclusion .= '<b>Не може</b> да изпълнява посочената длъжност/професия ' . HTMLFormat($row['position_name']) . ' в ' . HTMLFormat($firm['name']);
+					break;
+				case '3':
+					$stm_conclusion .= '<b>Не може да се прецени</b> пригодността на работещия да изпълнява посочената длъжност/професия ' . HTMLFormat($row['position_name']) . ' в ' . HTMLFormat($firm['name']);
+					break;
+			}
+			if (empty($stm_conclusion)) {
+				$stm_conclusion .= "\n";
+			}
+			$stm_conclusion .= $row['stm_conditions'] . ((!empty($row['stm_conditions2'])) ? "\n" . $row['stm_conditions2'] : '');
+			
+			$ary['stm_conclusion'] = $stm_conclusion;
+			$ary['stm_date2'] = $row['stm_date2'];
+			
+			$aWorkers[$worker_id]['prophylactic_cards'][] = $ary;
 		}
 	}
-	
 	
 	$sql = "SELECT d.*, m.mkb_desc, m.mkb_code, p.doctor_pos_name
 			FROM prchk_diagnosis d
@@ -467,41 +561,397 @@ function get_worker_data($dbInst = null, $firm_id = 0, $IDs = array()) {
 			$ary['days_off'] = $row['days_off'];
 			$ary['hospital_date_from'] = $row['hospital_date_from'];
 			
-			$aWorkers[$row['worker_id']]['vnr'][] = $ary;
+			$aWorkers[$row['worker_id']]['patient_charts'][] = $ary;
 		}
 	}
-	
-	
 
-
-	
-	//
-	
-	
 	$data['workers'] = $aWorkers;
 	
 	return $data;
 }
 
-$data = get_worker_data($dbInst, $firm_id, $IDs);
+$results = get_worker_data($dbInst, $firm_id, $IDs);
+if (!$results) {
+	die('No data.');
+}
 
-echo '<pre>' . print_r($data, 1) . '</pre>';
+/*echo '<pre>' . print_r($results, 1) . '</pre>';
+die();*/
 
+define('NO_DATA_AVAILABLE', 'Няма предоставени данни.');
 
+require_once("cyrlat.class.php");
+$cyrlat = new CyrLat;
+$filename = 'Zdravni_Dosieta_'.$cyrlat->cyr2lat($results['firm_name']);
 
+require('phprtflite/rtfbegin.php');
 
+$sect->writeText('Приложение № 6 към чл.11, ал.10', $times10, $alignRight);
+$sect->addEmptyParagraph();
+$sect->writeText('<b>ЗДРАВНИ ДОСИЕТА</b>', $times20, $alignCenter);
+$sect->writeText('<b>на ' . $results['firm_name'].'</b>', $times14, $alignCenter);
+$sect->addEmptyParagraph();
 
+if (!empty($results['workers'])) {
+	foreach ($results['workers'] as $res) {
+		$sect->writeText('<b>І. Паспортна част</b>', $times12, $alignLeft);
+		$sect->writeText('<b>' . $res['worker_names'] . '</b>', $times14, $alignCenter);
+		$sect->writeText('ЕГН: ' . $res['basic_info'], $times12, $alignLeft);
+		$sect->writeText('Дата на раждане: ' . $res['birth_date2'] . ' г.', $times12, $alignLeft);
+		$sect->writeText('Подразделение: ' . $res['subdivision_name'], $times12, $alignLeft);
+		$sect->writeText('Работно място: ' . $res['wplace_name'], $times12, $alignLeft);
+		$sect->writeText('Длъжност: ' . $res['position_name'], $times12, $alignLeft);
+		if (!empty($res['date_retired2'])) {
+			$sect->writeText('Напуснал на: ' . $res['date_retired2'] . ' г.', $times12, $alignLeft);
+		}
+		$sect->addEmptyParagraph();
+		
+		$sect->writeText('<b>ІІ. Професионален маршрут</b>', $times12, $alignLeft);
+		$sect->writeText('1. Настоящ: ' . $res['current_pro_route'], $times12, $alignLeft);
+		$rows = $res['prev_pro_routes'];
+		$sect->writeText('2. Преди: ' . ((empty($rows)) ? NO_DATA_AVAILABLE : ''), $times12, $alignLeft);
+		if (!empty($rows)) {
+			$data = array();
+			$data[] = array('Предприятие:', 'Длъжност/професия', 'Продължителност на стажа');
+			foreach ($rows as $row) {
+				$ary = array();
+				array_push($ary, $row['num'] . '. ' . $row['firm_name']);
+				array_push($ary, $row['position']);
+				array_push($ary, $row['experience']);
+				$data[] = $ary;
+			}
+			$colWidts = array(6, 6, 5);
+			$colAligns = array('left', 'left', 'left');
+			fnGenerateTable($data, $colWidts, $colAligns, $tableType = 'plain');
+		} else {
+			$sect->addEmptyParagraph();
+		}
+		
+		$rows = $res['readjustments'];
+		if (!empty($rows)) {
+			$sect->writeText('3. Трудоустрояване:', $times12, $alignLeft);
+			$data = array();
+			$data[] = array('Дата', 'МКБ', 'Диагноза', 'Комисия', 'Срок', 'Място на трудоустрояване');
+			foreach ($rows as $row) {
+				$ary = array();
+				array_push($ary, $row['published_on']);
+				array_push($ary, $row['mkb_id']);
+				array_push($ary, $row['diagnosis']);
+				array_push($ary, $row['commission']);
+				array_push($ary, $row['period']);
+				array_push($ary, $row['place']);
+				$data[] = $ary;
+			}
+			$colWidts = array(2.5, 1.5, 5, 1.8, 3.2, 3);
+			$colAligns = array('center', 'center', 'left', 'left', 'left', 'left');
+			fnGenerateTable($data, $colWidts, $colAligns, $tableType = 'small');
+		}
+		
+		//
+		
+		$sect->writeText('<b>ІІІ. Данни за регистрирани професионални болести, трудови злополуки, трудоустрояване и за трайно намалена работоспособност</b>', $times12, $alignLeft);
 
+		$sect->addEmptyParagraph();
+		
+		$rows = $res['pro_diseases'];
+		$sect->writeText('1. Регистрирани професионални болести по данни на работещия и/или работодателя: ' . ((empty($rows)) ? NO_DATA_AVAILABLE : ''), $times12, $alignLeft);
+		if (!empty($rows)) {
+			foreach ($rows as $row) {
+				$sect->writeText('- ' . $row, $times12, $alignLeft);
+			}
+		}
+		
+		$sect->addEmptyParagraph();
+		
+		$rows = $res['work_accidents'];
+		$sect->writeText('2. Трудови злополуки по данни на работещия и/или работодателя: ' . ((empty($rows)) ? NO_DATA_AVAILABLE : ''), $times12, $alignLeft);
+		if (!empty($rows)) {
+			foreach ($rows as $row) {
+				$sect->writeText('- ' . $row, $times12, $alignLeft);
+			}
+		}
+		
+		$sect->addEmptyParagraph();
 
+		$rows = $res['readjustment_50down'];
+		$sect->writeText('3. Трудоустрояване по данни на работещия и/или работодателя: ' . ((empty($rows)) ? NO_DATA_AVAILABLE : ''), $times12, $alignLeft);
+		if (!empty($rows)) {
+			foreach ($rows as $row) {
+				$sect->writeText('- ' . $row, $times12, $alignLeft);
+			}
+		}
+		
+		$sect->addEmptyParagraph();
+		
+		$rows = $res['readjustment_50up'];
+		$sect->writeText('4. Трайно намалена работоспособност по данни на работещия и/или работодателя: ' . ((empty($rows)) ? NO_DATA_AVAILABLE : ''), $times12, $alignLeft);
+		if (!empty($rows)) {
+			$i = 1;
+			foreach ($rows as $row) {
+				$sect->writeText('4.'. $i++ . '. ' . $row[0], $times12, $alignLeft);
+				$sect->writeText($row[1] . "\n", $times12, $alignLeft);
+				$percent_inv = intval($row[2]);
+				$checkbox = $sect->addCheckbox();
+				if(90 < $percent_inv) { $checkbox->setChecked(); }
+				$sect->writeText('над 90 %', $times12, $alignLeft);
+		
+				$checkbox = $sect->addCheckbox();
+				if(70 < $percent_inv && 90 >= $percent_inv) { $checkbox->setChecked(); }
+				$sect->writeText('от 71 – 90 %', $times12, $alignLeft);
+		
+				$checkbox = $sect->addCheckbox();
+				if(50 <= $percent_inv && 70 >= $percent_inv) { $checkbox->setChecked(); }
+				$sect->writeText('от 50 – 70 %', $times12, $alignLeft);
+			}
+		}
+		
+		$sect->addEmptyParagraph();
+		
+		$rows = $res['patient_charts'];
+		if (!empty($rows)) {
+			$sect->writeText('5. ВНР', $times12, $alignLeft);
+			$data = array();
+			$data[] = array('МКБ', 'Причина', 'Вид', 'Брой дни', 'От дата');
+			foreach ($rows as $row) {
+				$data[] = array_values($row);
+			}
+			$colWidts = array(3, 3, 4, 3, 3);
+			$colAligns = array('center', 'center', 'center', 'center', 'center');
+			fnGenerateTable($data, $colWidts, $colAligns, $tableType = 'small');
+		}
+		
+		$str = '<b>ІV. Условия на труд и данни от проведени предварителни и периодични медицински прегледи и изследвания по време на работата на работещия</b> в ' . $results['firm_name'];
+		if (!empty($results['firm_location'])) {
+			$str .= ' - ' . $results['firm_location'];
+		}
+		if (!empty($results['firm_address'])) {
+			$str .= ', ' . $results['firm_address'];
+		}
+		$sect->writeText($str, $times12, $alignLeft);
+		
+		$sect->addEmptyParagraph();
+		
+		$sect->writeText('1. Данни за изпълняваната в предприятието длъжност/професия, работното място и условията на труд', $times12, $alignLeft);
+		$sect->writeText('1.1. Длъжност: ' . $dbInst->my_mb_ucfirst($res['position_name']), $times12, $alignLeft);
+		$sect->writeText('1.2. Работно място: ' . $dbInst->my_mb_ucfirst($res['wplace_name']), $times12, $alignLeft);
+		$sect->writeText('1.3. Условия на труд при длъжност/професия по т. 1.1 и работно място по т. 1.2', $times12, $alignLeft);
+		$sect->writeText('1.3.1. Кратко описание на извършваната дейност:', $times12, $alignLeft);
+		$i = 1;
+		if (!empty($res['position_workcond'])) {
+			$sect->writeText('1.3.1.' . $i++ . '. ' . $res['position_workcond'], $times12, $alignLeft);
+		}
+		if (!empty($res['wplace_workcond'])) {
+			$sect->writeText('1.3.1.' . $i++ . '. ' . $res['wplace_workcond'], $times12, $alignLeft);
+		}
+		
+		$rows = $res['work_env_protocols'];
+		if (!empty($rows)) {
+			$sect->writeText('1.3.2. Фактори на работната среда и трудовия процес', $times12, $alignLeft);
+			$data = array();
+			$data[] = array('Показател', '№ и дата на протокола', 'Установени норми', 'Гранични');
+			foreach ($rows as $row) {
+				unset($row['prot_date']);
+				$data[] = array_values($row);
+			}
+			$colWidts = array(5, 4, 4, 4);
+			$colAligns = array('center', 'center', 'center', 'center', 'center');
+			fnGenerateTable($data, $colWidts, $colAligns, $tableType = 'small');
+		} else {
+			$sect->addEmptyParagraph();
+		}
+		
+		$rows = $res['wplace_factors_info'];
+		if (!empty($rows)) {
+			foreach ($rows as $row) {
+				$sect->writeText($row, $times12, $alignLeft);
+			}
+		}
+		
+		$sect->writeText('2. Данни от предварителен медицински преглед:' . "\n", $times12, $alignLeft);
+		
+		if(!empty($res['prchk_date2'])) {
+			$checkbox = $sect->addCheckbox();
+			$checkbox->setChecked();
+			$sect->writeText('2.1. Има налични данни за проведен предварителен преглед.', $times12, $alignLeft);
+			$sect->writeText('2.1.1. Kарта за предварителен медицински преглед, издадена от ' . $res['prchk_author'], $times12, $alignLeft);
+			
+			$rows = $res['prchk_conclusions'];
+			if (!empty($rows)) {
+				$sect->addEmptyParagraph();
+				$sect->writeText('- Заключение на лекаря/лекарите, провели прегледите:', $times12, $alignLeft);
+				foreach ($rows as $row) {
+					$sect->writeText($row, $times12, $alignLeft);
+				}
+			}
+			
+			$rows = $res['prchk_diagnosis'];
+			if (!empty($rows)) {
+				$sect->addEmptyParagraph();
+				$sect->writeText('- Заболявания (диагнози)', $times12, $alignLeft);
+				$data = array();
+				$data[] = array('МКБ', 'Диагноза', 'Издадена от');
+				foreach ($rows as $row) {
+					$data[] = array_values($row);
+				}
+				$colWidts = array(2, 11, 4);
+				$colAligns = array('center', 'left', 'left');
+				fnGenerateTable($data, $colWidts, $colAligns, $tableType = 'small');
+			}
+			
+			$prchk_date2 = (isset($res['prchk_date2']) && !empty($res['prchk_date2'])) ? $res['prchk_date2'] : '';
+			
+			$sect->writeText('2.1.2. Заключение на СТМ за пригодността на работещия да изпълнява даден вид дейност въз основа на карта от задължителен предварителен медицински преглед, издадена от ' . $res['prchk_author'] . ' ' . ((!empty($prchk_date2)) ? ' на ' . $prchk_date2 . ' г.' : ''), $times12, $alignLeft);
+			
+			$data = array();
+			$data[] = array('Наименование и адрес на СТМ, изготвила заключението, и дата на изготвянето му', 'Заключение');
+			$ary = array();
+			array_push($ary, $results['stm_name_short'] . "\n" . $results['stm_address'] . ((!empty($prchk_date2)) ? ' / ' . $prchk_date2 . ' г.' : ''));
+			array_push($ary, $res['prchk_stm_conclusion']);
+			$data[] = $ary;
+			$colWidts = array(8, 9);
+			$colAligns = array('left', 'left');
+			fnGenerateTable($data, $colWidts, $colAligns, $tableType = 'small');
+		} else {
+			$checkbox = $sect->addCheckbox();
+			$checkbox->setChecked();
+			$sect->writeText('2.1. Няма налични данни за проведен предварителен медицински преглед.', $times12, $alignLeft);
+			$sect->addEmptyParagraph();
+		}
+		
+		$sect->writeText('3. Данни от извършените периодични медицински прегледи и изследвания:', $times12, $alignLeft);
+		$sect->writeText('3.1. Работещият се е явил на периодичен медицински преглед и са проведени определените изследвания.', $times12, $alignLeft);
+		
+		$rows = $res['prophylactic_cards'];
+		if (!empty($rows)) {
+			$k = 1;
+			foreach ($rows as $row) {
+				$sect->writeText('3.' . $k . '.1. Дата на провеждане на прегледа: ' . ((empty($row['checkup_date_h'])) ? '--' : $row['checkup_date_h'] . ' г.'), $times12, $alignLeft);
+				$sect->writeText('3.' . $k . '.2. Наименование на лечебното заведение, провело прегледа: '.((empty($row['hospitals'])) ? NO_DATA_AVAILABLE : $row['hospitals']) . '.', $times12, $alignLeft);
+				$sect->writeText('3.' . $k . '.3. Вид на медицинските специалисти, извършили прегледите' . $row['doctors'] . '.', $times12, $alignLeft);
+				$sect->writeText('3.' . $k . '.4. Вид на извършените функционални и лабораторни изследвания.', $times12, $alignLeft);
+				if (isset($row['EKG']) && !empty($row['EKG'])) {
+					$sect->writeText('ЕКГ: ' . $row['EKG'], $times12, $alignLeft);
+				}
+				if (isset($row['x_ray']) && !empty($row['x_ray'])) {
+					$sect->writeText('Рентгенография: ' . $row['x_ray'], $times12, $alignLeft);
+				}
+				if (isset($row['echo_ray']) && !empty($row['echo_ray'])) {
+					$sect->writeText('Ехография: ' . $row['echo_ray'], $times12, $alignLeft);
+				}
+				if (($row['left_eye'] != '' || $row['right_eye'] != '')) {
+					$sect->writeText('Зрителна острота', $times12, $alignLeft);
+					$sect->writeText('Ляво око: ' . HTMLFormat($row['left_eye']) . ' / ' . HTMLFormat($row['left_eye2']) . ' dp'."\t\t".'Дясно око: ' . HTMLFormat($row['right_eye']) . ' / ' . HTMLFormat($row['right_eye2']) .' dp', $times12, $alignLeft);
+				}
+				if ((!empty($row['VK']) || !empty($row['FEO1']))) {
+					$sect->writeText('Функционално изследване на дишането', $times12, $alignLeft);
+					$sect->writeText('ВК: ' . HTMLFormat($row['VK']) . ' ml'."\t\t\t".'ФЕО 1: ' . HTMLFormat($row['FEO1']) . ' ml', $times12, $alignLeft);
+				}
+				if (!empty($row['tifno'])) {
+					$sect->writeText('Показател на Тифно: ' . $row['tifno'], $times12, $alignLeft);
+				}
+				if (!empty($row['hearing_loss'])) {
+					$sect->writeText('Тонална аудиометрия', $times12, $alignLeft);
+					$sect->writeText('Загуба на слуха: ' . $row['hearing_loss'], $times12, $alignLeft);
+					$sect->writeText('Ляво ухо: ' . $row['left_ear'] . "\t\t".'Дясно ухо: ' . $row['right_ear'], $times12, $alignLeft);
+					if(!empty($row['hearing_diagnose'])) {
+						$sect->writeText('Диагноза: ' . $row['hearing_diagnose'], $times12, $alignLeft);
+					}
+				}
+				
+				//Фамилна обремененост
+				$sect->writeText('Фамилна обремененост: ' . ((!empty($row['fweights_descr'])) ? HTMLFormat($row['fweights_descr']) : '--'), $times12, $alignLeft);
+				$flds = $row['fweights_list'];
+				if (!empty($flds)) {
+					$data = array();
+					$data[] = array('МКБ', 'Диагноза');
+					foreach ($flds as $fld) {
+						$data[] = array_values($fld);
+					}
+					$colWidts = array(2, 15);
+					$colAligns = array('center', 'left');
+					fnGenerateTable($data, $colWidts, $colAligns, $tableType = 'plain');
+				}
+				
+				$flds = $row['lab_tests'];
+				if (!empty($flds)) {
+					$sect->writeText('Лабораторни изследвания', $times12, $alignLeft);
+					$data = array();
+					$data[] = array('Показател', 'Min', 'Max', 'Ниво', '');
+					foreach ($flds as $fld) {
+						$data[] = array_values($fld);
+					}
+					$colWidts = array(5, 3, 3, 3, 3);
+					$colAligns = array('left', 'center', 'center', 'center', 'center');
+					fnGenerateTable($data, $colWidts, $colAligns, $tableType = 'small');
+				}
+				
+				//Анамнеза
+				$sect->writeText('Анамнеза: ' . ((!empty($row['anamnesis_descr'])) ? HTMLFormat($row['anamnesis_descr']) : '--'), $times12, $alignLeft);	
+				$flds = $row['anamnesis_list'];
+				if (!empty($flds)) {
+					$data = array();
+					$data[] = array('МКБ', 'Диагноза');
+					foreach ($flds as $fld) {
+						$data[] = array_values($fld);
+					}
+					$colWidts = array(2, 15);
+					$colAligns = array('center', 'left');
+					fnGenerateTable($data, $colWidts, $colAligns, $tableType = 'plain');
+				}
+				
+				$flds = $row['diagnosis_list'];
+				if (!empty($flds)) {
+					$sect->writeText('Заболявания (диагнози)', $times12, $alignLeft);
+					$data = array();
+					$data[] = array('МКБ', 'Диагноза', 'Новооткрито');
+					foreach ($flds as $fld) {
+						$data[] = array_values($fld);
+					}
+					$colWidts = array(2, 12, 3);
+					$colAligns = array('center', 'left', 'center');
+					fnGenerateTable($data, $colWidts, $colAligns, $tableType = 'small');
+				}
+				
+				$sect->writeText('3.' . $k . '.5. Заключение на лекаря/лекарите, провели прегледите:', $times12, $alignLeft);
+				
+				$flds = $row['conclusion_list'];
+				if (!empty($flds)) {
+					foreach ($flds as $fld) {
+						$sect->writeText($fld, $times12, $alignLeft);
+					}
+				}
+				
+				$sect->writeText('3.' . $k . '.6. Заключение на службата по трудова медицина за пригодността на работещия да изпълнява даден вид дейност въз основа на задължителния периодичен медицински преглед, проведен' . ((!empty($row['hospitals'])) ? ' от/в ' . $row['hospitals'] : '') . ' на ' . ((empty($row['checkup_date_h'])) ? '--' : $row['checkup_date_h'] . ' г.'), $times12, $alignLeft);
+				
+				$data = array();
+				$data[] = array('Наименование и адрес на СТМ, изготвила заключението, и дата на изготвянето му', 'Заключение');
+				$ary = array();
+				array_push($ary, $results['stm_name_short'] . "\n" . $results['stm_address'] . ((!empty($row['stm_date2'])) ? ' / ' . $row['stm_date2'] . ' г.' : ''));
+				array_push($ary, $row['stm_conclusion']);
+				$data[] = $ary;
+				$colWidts = array(8, 9);
+				$colAligns = array('left', 'left');
+				fnGenerateTable($data, $colWidts, $colAligns, $tableType = 'small');
+				
+				$k++;
+			}
+		}
+		
+		$sect->writeText('<b>V. Данни за посещенията на работещия в службата по трудова медицина по негова инициатива</b>', $times12, $alignLeft);
 
+		$sect->addEmptyParagraph();
+		
+		$sect->writeText('1. Извършено посещение на работещия в '. $results['stm_name_short']  .'.', $times12, $alignLeft);
+		$sect->writeText('2. Дата на извършеното посещение:', $times12, $alignLeft);
+		$sect->writeText('3. Кратко описание на целта на посещението.', $times12, $alignLeft);
+		$sect->writeText('4. Описание на предприетите мерки от службата по трудова медицина във връзка с поставените въпроси, проблеми и други, когато е необходимо.', $times12, $alignLeft);
+		$sect->writeText('5. Други.', $times12, $alignLeft);
+		
+		$sect->addEmptyParagraph();
+		$sect->addEmptyParagraph();
+		$sect->addEmptyParagraph();
+	}//workers foreach loop end
+}
 
-
-
-
-
-
-
-
-
-
+require('phprtflite/rtfend.php');
 

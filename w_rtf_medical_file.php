@@ -392,8 +392,11 @@ if(!empty($f['prchk_date2'])) {
 		$colAligns = array('center', 'left', 'left');
 		fnGenerateTable($data, $colWidts, $colAligns, $tableType = 'small');
 	}
+	
+	$prchk_date2 = (isset($f['prchk_date2']) && !empty($f['prchk_date2'])) ? $f['prchk_date2'] : '';
 
-	$sect->writeText('2.1.2. Заключение на СТМ за пригодността на работещия да изпълнява даден вид дейност въз основа на карта от задължителен предварителен медицински преглед, издадена от '.$dbInst->shortStmName($stm_name).' '.((isset($f['prchk_stm_date2']) && !empty($f['prchk_stm_date2'])) ? ' на '.$f['prchk_stm_date2'].' г.' : ''), $times12, $alignLeft);
+	//$sect->writeText('2.1.2. Заключение на СТМ за пригодността на работещия да изпълнява даден вид дейност въз основа на карта от задължителен предварителен медицински преглед, издадена от '.$dbInst->shortStmName($stm_name).' '.((isset($f['prchk_stm_date2']) && !empty($f['prchk_stm_date2'])) ? ' на '.$f['prchk_stm_date2'].' г.' : ''), $times12, $alignLeft);
+	$sect->writeText('2.1.2. Заключение на СТМ за пригодността на работещия да изпълнява даден вид дейност въз основа на карта от задължителен предварителен медицински преглед, издадена от ' . HTMLFormat($f['prchk_author']) . ' ' . ((!empty($prchk_date2)) ? ' на ' . $prchk_date2 . ' г.' : ''), $times12, $alignLeft);
 
 	$stm_conclusion = '';
 	if('1' == $f['prchk_conclusion']) {
@@ -409,7 +412,7 @@ if(!empty($f['prchk_date2'])) {
 	$data = array();
 	$data[] = array('Наименование и адрес на СТМ, изготвила заключението, и дата на изготвянето му', 'Заключение');
 	$ary = array();
-	array_push($ary, $dbInst->shortStmName($stm_name)."\n".$s['address']);
+	array_push($ary, $dbInst->shortStmName($stm_name) . "\n" . $s['address'] . ((!empty($prchk_date2)) ? ' / ' . $prchk_date2 . ' г.' : ''));
 	array_push($ary, $stm_conclusion);
 	$data[] = $ary;
 	$colWidts = array(8, 9);
@@ -419,7 +422,7 @@ if(!empty($f['prchk_date2'])) {
 } else {
 	$checkbox = $sect->addCheckbox();
 	$checkbox->setChecked();
-	$sect->writeText('2.2. Няма налични данни за проведен предварителен медицински преглед.', $times12, $alignLeft);
+	$sect->writeText('2.1. Няма налични данни за проведен предварителен медицински преглед.', $times12, $alignLeft);
 	$sect->addEmptyParagraph();
 }
 
@@ -488,7 +491,7 @@ foreach ($rows as $row) {
 		$sect->writeText('Тонална аудиометрия', $times12, $alignLeft);
 		$sect->writeText('Загуба на слуха: '.$line['hearing_loss'], $times12, $alignLeft);
 		
-		$sect->writeText('Ляво ухо: '.$line['left_ear']."\t\t".'Дясно ухо: '.$line['left_ear'], $times12, $alignLeft);
+		$sect->writeText('Ляво ухо: '.$line['left_ear']."\t\t".'Дясно ухо: '.$line['right_ear'], $times12, $alignLeft);
 		if(isset($line['hearing_diagnose']) && !empty($line['hearing_diagnose'])) {
 			$sect->writeText('Диагноза: '.$line['hearing_diagnose'], $times12, $alignLeft);
 		}
@@ -504,7 +507,7 @@ foreach ($rows as $row) {
 			$mkb_id = HTMLFormat($fld['mkb_id']);
 			$mkb_desc = HTMLFormat($fld['mkb_desc']);
 			if($fld['diagnosis'] != '') {
-				$mkb_desc .= '<br>'.HTMLFormat($fld['diagnosis']);
+				$mkb_desc .= "\n".HTMLFormat($fld['diagnosis']);
 			}
 			$data[] = array($mkb_id, $mkb_desc);
 		}
@@ -521,7 +524,7 @@ foreach ($rows as $row) {
 		$data[] = array('Показател', 'Min', 'Max', 'Ниво', '');
 		foreach ($checkups as $row) {
 			$ary = array();
-			array_push($ary, $row['indicator_name']);
+			array_push($ary, $row['indicator_type'] . ((!empty($row['indicator_name'])) ? ' (' . $row['indicator_name'] . ')' : ''));
 			array_push($ary, $row['pdk_min']);
 			array_push($ary, $row['pdk_max']);
 			array_push($ary, $row['checkup_level']);
@@ -533,7 +536,7 @@ foreach ($rows as $row) {
 		fnGenerateTable($data, $colWidts, $colAligns, $tableType = 'small');
 	}
 
-	//Фамилна обремененост
+	//Анамнеза
 	$sect->writeText('Анамнеза: '.((!empty($line['anamnesis_descr'])) ? HTMLFormat($line['anamnesis_descr']) : '--'), $times12, $alignLeft);	
 	$flds = $dbInst->getAnamnesis($checkup_id);
 	if($flds) {
@@ -543,7 +546,7 @@ foreach ($rows as $row) {
 			$mkb_id = HTMLFormat($fld['mkb_id']);
 			$mkb_desc = HTMLFormat($fld['mkb_desc']);
 			if($fld['diagnosis'] != '') {
-				$mkb_desc .= '<br>'.HTMLFormat($fld['diagnosis']);
+				$mkb_desc .= "\n".HTMLFormat($fld['diagnosis']);
 			}
 			$data[] = array($mkb_id, $mkb_desc);
 		}
@@ -607,11 +610,11 @@ foreach ($rows as $row) {
 	$data = array();
 	$data[] = array('Наименование и адрес на СТМ, изготвила заключението, и дата на изготвянето му', 'Заключение');
 	$ary = array();
-	array_push($ary, $dbInst->shortStmName($stm_name)."\n".$s['address']);
+	array_push($ary, $dbInst->shortStmName($stm_name) . "\n" . $s['address'] . ((!empty($line['stm_date2'])) ? ' / ' . $line['stm_date2'] . ' г.' : ''));
 	array_push($ary, $stm_conclusion);
 	$data[] = $ary;
 	$colWidts = array(8, 9);
-	$colAligns = array('center', 'left');
+	$colAligns = array('left', 'left');
 	fnGenerateTable($data, $colWidts, $colAligns, $tableType = 'small');
 
 	$k++;
