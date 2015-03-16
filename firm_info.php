@@ -1038,6 +1038,18 @@ function echoWorkers($firm_id)
                 <?php } ?></td>
               </tr>
               <tr>
+                <td><?php
+                if($cnt > $ownersPerExport) {
+                ?><a id="lnkMedicalFileExport" href="javascript:void(0);" onclick="window.location.href='w_rtf_madical_file_export.php?firm_id=<?=$firm_id?>&page='+$('#archiveParts2').val()+'&limit=<?=$ownersPerExport?>';" title="Пренос на здравните досиета"><img width="16" border="0" height="16" alt="download" src="img/books_016.gif" /> Пренос на здравните досиета</a> <select id="archiveParts2" name="archiveParts2">
+                  <?php
+                  for ($i = 1, $j = 1; $i <= $cnt; $i += $ownersPerExport, $j++) { echo '<option value="'.$j.'">Том '.$j.' &nbsp;</option>'; }
+               	  ?>
+                </select> <em>(по не повече от <?=$ownersPerExport?> работещи на том)</em>
+                <?php } else { ?>
+                <a id="lnkMedicalFileExport" href="w_rtf_madical_file_export.php?firm_id=<?=$firm_id?>" title="Пренос на здравните досиета"><img width="16" border="0" height="16" alt="download" src="img/download2.gif" /> Пренос на здравните досиета</a>
+                <?php } ?></td>
+              </tr>
+              <tr>
                 <td><a class="workerinfo" href="transfer_medical_info.php?firm_id=<?=$firm_id?>&<?=SESS_NAME.'='.session_id()?>"><img width="16" border="0" height="16" alt="download" src="img/download2.gif" title="Прехвърляне на медицинска информация от други фирми" /> Прехвърляне на медицинска информация от други фирми</a></td>
               </tr>
               <tr>
