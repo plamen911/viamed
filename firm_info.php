@@ -1023,6 +1023,9 @@ function echoWorkers($firm_id)
               <tr>
                 <td><a id="lnkHealthStatus" href="#" title="Здравен статус на работещите"><img src="img/medical3.gif" width="16" height="16" border="0" alt="Списък" /> Справка здравен статус на работещите</a></td>
               </tr>
+                <tr>
+                    <td><a id="lnkEyeSharpness" href="#" title="Зрителна острота на работещите"><img src="img/medical3.gif" width="16" height="16" border="0" alt="Списък" /> Справка зрителна острота на работещите</a></td>
+                </tr>
               <tr>
                 <td><?php
                 $ownersPerExport = 100;
@@ -1509,6 +1512,10 @@ $(document).ready(function() {
 	});
 	$("#lnkHealthStatus").click(function(){
 		window.location = 'xl_health_status.php?firm_id=<?=$firm_id?>&<?=SESS_NAME.'='.session_id()?>';
+		return false;
+	});
+    $("#lnkEyeSharpness").click(function(){
+		window.location = 'w_rtf_eye_sharpness.php?firm_id=<?=$firm_id?>&<?=SESS_NAME.'='.session_id()?>';
 		return false;
 	});
 });
