@@ -1,4 +1,16 @@
 <?php
+/**
+ * @global $dbInst
+ * @global $sect
+ * @global $times11
+ * @global $times12
+ * @global $times14
+ * @global $times20
+ * @global $alignLeft
+ * @global $alignCenter
+ * @global $rtf
+ */
+
 // http://localhost/stm2008/hipokrat/w_rtf_analiz_above100.php?firm_id=187&date_from=01.01.2011&date_to=31.12.2012
 ini_set('memory_limit', '128M');
 require('includes.php');
@@ -101,6 +113,12 @@ if(!empty($data)) {
 	$colAligns = array('left', 'center', 'center');
 	fnGenerateTable($data, $colWidts, $colAligns, $tableType = 'nosology');
 	fnGenerateChart($tbl['chart_data'], $imgname = 'primarylists_'.$firm_id, $title = 'Разпределение по абсолютен брой случаи (първични болнични листове)');
+
+    $sect->writeText('    От направения анализ на разпределението по случаи се наблюдава следното подреждане:', $times12, $alignLeft);
+    fnChartDataPercentsList($tbl['chart_data'], $primary_charts, 'случаи', $sect, $times12, $alignLeft);
+    $sect->addEmptyParagraph();
+    $sect->writeText('    Налага се мнението за преобладаващи заболявания от общ характер или многофакторни заболявания и като причинно-следствена връзка: сезонността като водеща причина и наличната световна пандемия от коронавирусни инфекции.', $times12, $alignLeft);
+    $sect->addEmptyParagraph();
 }
 
 $days_off = (!empty($objStats->days_off)) ? $objStats->days_off : 'Няма предоставени данни';
@@ -115,6 +133,12 @@ if(!empty($data)) {
 	$colAligns = array('left', 'center', 'center');
 	fnGenerateTable($data, $colWidts, $colAligns, $tableType = 'nosology');
 	fnGenerateChart($tbl['chart_data'], $imgname = 'numdaysoff_'.$firm_id, $title = 'Разпределение по брой на дните с временна неработоспособност');
+
+    $sect->writeText('    От графиката е видно следното подреждане:', $times12, $alignLeft);
+    fnChartDataPercentsList($tbl['chart_data'], $days_off, 'дни', $sect, $times12, $alignLeft);
+    $sect->addEmptyParagraph();
+    $sect->writeText('    Показателят честота на дните не следва разпределението на честотата на случаите по нозологични единици, защото за различните случаи или диагнози са необходими различни периоди от време за възстановяване или оздравяване, като се има предвид и настоящата епидемия от коронавирусна инфекция, при която периода за възстановяване не следва карантинните мерки.', $times12, $alignLeft);
+    $sect->addEmptyParagraph();
 }
 
 $primary_charts_days_off_3down = (!empty($objStats->primary_charts_days_off_3down)) ? $objStats->primary_charts_days_off_3down : 'Няма предоставени данни';
@@ -155,6 +179,10 @@ if(!empty($data)) {
 	$colAligns = array('left', 'center', 'center');
 	fnGenerateTable($data, $colWidts, $colAligns, $tableType = 'nosology');
 	fnGenerateChart($objStats->chart_data, $imgname = 'prophylactic_'.$firm_id, $title = 'Разпределение по брой заболявания, открити при периодичните мед. прегледи');
+
+    $sect->writeText('    Наблюдава се следната зависимост:', $times12, $alignLeft);
+    fnChartDataPercentsList($objStats->chart_data, $num_diseases_medical_checkups, 'новооткрити заболявания', $sect, $times12, $alignLeft);
+    $sect->addEmptyParagraph();
 }
 
 $num_ill_workers_medical_checkups = (!empty($objStats->num_ill_workers_medical_checkups)) ? 'общо <b>'.$objStats->num_ill_workers_medical_checkups.'</b>.' : '<b>Няма предоставени данни</b>.';
@@ -353,7 +381,8 @@ if(!empty($data)) {
 }
 
 $sect->writeText('14. Анализ на връзката между данните за заболяемостта и трудовата дейност, изводи и препоръки:', $times12, $alignLeft);
-$sect->writeText('Няма пряка връзка между регистрираните заболявания и условията на труд. Работодателят е предприел всички необходими мерки за ЗБУТ.', $times12, $alignLeft);
+// $sect->writeText('Няма пряка връзка между регистрираните заболявания и условията на труд. Работодателят е предприел всички необходими мерки за ЗБУТ.', $times12, $alignLeft);
+fnGeneralConclusion(((isset($f['firm_name'])) ? HTMLFormat($f['firm_name']) : ''), $dbInst->extractYear($date_from, $date_to), $sect, $times12, $alignLeft);
 
 require('phprtflite/rtfend.php');
 die();
