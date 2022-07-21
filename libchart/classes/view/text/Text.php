@@ -1,6 +1,6 @@
 <?php
     /* Libchart - PHP chart library
-     * Copyright (C) 2005-2011 Jean-Marc Trémeaux (jm.tremeaux at gmail.com)
+     * Copyright (C) 2005-2011 Jean-Marc Trï¿½meaux (jm.tremeaux at gmail.com)
      * 
      * This program is free software: you can redistribute it and/or modify
      * it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
     /**
      * Text drawing helper
      *
-     * @author Jean-Marc Trémeaux (jm.tremeaux at gmail.com)
+     * @author Jean-Marc Trï¿½meaux (jm.tremeaux at gmail.com)
      */
     class Text {
         public $HORIZONTAL_LEFT_ALIGN = 1;
@@ -60,11 +60,22 @@
             if (!($align & $this->VERTICAL_CENTER_ALIGN) && !($align & $this->VERTICAL_BOTTOM_ALIGN)) {
                 $align |= $this->VERTICAL_TOP_ALIGN;
             }
+            
+            // Fix - New code since 3/17/14 start +++++++++++++++++++++++++++++++++++++++++++
+            # detect if the string was passed in as unicode
+			$text_encoding = mb_detect_encoding($text, 'UTF-8, ISO-8859-1');
+			# make sure it's in unicode
+			if ($text_encoding != 'UTF-8') {
+				$text = mb_convert_encoding($text, 'UTF-8', $text_encoding);
+			}
+			# html numerically-escape everything (&#[dec];)
+			$text = mb_encode_numericentity($text, array (0x0, 0xffff, 0, 0xffff), 'UTF-8');
+			// New code since 3/17/14 end +++++++++++++++++++++++++++++++++++++++++++
 
             $fontSize = 8;
             $lineSpacing = 1;
 
-             list ($llx, $lly, $lrx, $lry, $urx, $ury, $ulx, $uly) = imageftbbox($fontSize, 0, $fontFileName, $text, array("linespacing" => $lineSpacing));
+            list ($llx, $lly, $lrx, $lry, $urx, $ury, $ulx, $uly) = imageftbbox($fontSize, 0, $fontFileName, $text, array("linespacing" => $lineSpacing));
 
             $textWidth = $lrx - $llx;
             $textHeight = $lry - $ury;

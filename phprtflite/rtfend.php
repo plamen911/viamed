@@ -4,7 +4,7 @@ $sect->addEmptyParagraph();
 
 if(!isset($timesFooter)) $timesFooter = $times12;
 
-$sect->writeText(((!empty($date)) ? $date : date("d.m.Y"))." г.\t\t\tЛекар СТМ:", $timesFooter, $alignLeft);
+$sect->writeText(((!empty($date)) ? $date : date("d.m.Y"))." г.\t\t\tЛице, управляващо СТМ:", $timesFooter, $alignLeft);
 //$sect->writeText('('.HTMLFormat($s['chief']).')', $timesFooter, $alignRight);
 $sect->writeText('(.........................................)', $timesFooter, $alignRight);
 
