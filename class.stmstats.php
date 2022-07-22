@@ -625,20 +625,39 @@ AND (julianday(`hospital_date_from`) <= julianday('$date_to')))";
 				}
 			}
 			unset($rows);
-			
+
 			// *** TELKs
-			$sql = "SELECT t.* , i.`position_id` AS `position_id`, i.`position_name` AS `position_name` 
-					FROM `telks` t
-					LEFT JOIN `workers` w ON (w.`worker_id` = t.`worker_id`)
-					LEFT JOIN `firm_struct_map` m ON (m.`map_id` = w.`map_id`)
-					LEFT JOIN `firm_positions` i ON (i.`position_id` = m.`position_id`)
-					WHERE t.`worker_id` IN (".implode(',', $IDs).") 
-					AND (
-						( julianday(t.`telk_date_from`) >= julianday('$date_from') ) AND ( julianday(t.`telk_date_from`) <= julianday('$date_to') )
-						OR
-						( julianday(t.`telk_date_from`) <= julianday('$date_to') ) AND ( (t.`telk_date_to` = '' OR `telk_date_to` IS NULL) OR julianday(t.`telk_date_to`) >= julianday('$date_from') )
-					)";
-			$rows = $this->query($sql);
+            $rows = array();
+            if (!empty($IDs)) {
+                $sql = "SELECT t.*, i.`position_id` AS `position_id`, i.`position_name` AS `position_name`, w.egn AS egn
+                        FROM `telks` t
+                                 LEFT JOIN `workers` w ON (w.`worker_id` = t.`worker_id`)
+                                 LEFT JOIN `firm_struct_map` m ON (m.`map_id` = w.`map_id`)
+                                 LEFT JOIN `firm_positions` i ON (i.`position_id` = m.`position_id`)
+                        WHERE t.`worker_id` IN (".implode(',', $IDs).")
+                            AND (
+                                (
+                                    (julianday(t.`telk_date_from`) >= julianday('$date_from'))
+                                    AND
+                                    (julianday(t.`telk_date_from`) <= julianday('$date_to'))
+                                )
+                                OR
+                                (
+                                    (julianday(t.`telk_date_from`) <= julianday('$date_to'))
+                                    AND
+                                    (t.`telk_date_to` = '' OR t.`telk_date_to` IS NULL OR t.`telk_duration` LIKE 'пожизнен')
+                                )
+                                OR
+                                (
+                                    (julianday(t.`telk_date_from`) <= julianday('$date_to'))
+                                    AND
+                                    (julianday(t.`telk_date_to`) >= julianday('$date_from'))
+                                )
+                            )";
+
+                $rows = $this->query($sql, PDO::FETCH_ASSOC);
+            }
+
 			$num_workers_with_telk = array();
 			if(!empty($rows)) {
 				foreach ($rows as $row) {

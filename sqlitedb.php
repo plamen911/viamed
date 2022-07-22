@@ -4823,7 +4823,7 @@ class SqliteDB
 		}
 	}
 
-	public function query($sql) {
+	public function query($sql, $mode = PDO::FETCH_BOTH) {
 		$db = $this->getDBHandle();
 		$sql = trim($sql);
 		try {
@@ -4835,7 +4835,7 @@ class SqliteDB
 					die('Грешка при изпълнение на заявка към базата данни: ' . $err[2] . ', SQL: ' . $sql);
 				}
 				$prepstatement->execute();
-				$rows = $prepstatement->fetchAll();
+				$rows = $prepstatement->fetchAll($mode);
 				return $rows;
 			}
 			elseif (preg_match('/^(insert|update|replace|delete|alter|create)\b/i', $sql, $matches))
