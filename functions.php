@@ -5,19 +5,19 @@ function my_session_start() {
 	ini_set('session.gc_probability',1);
 	ini_set('session.gc_divisor',1);
 	session_set_cookie_params(8*60*60);
-	
+
 	$session_name = SESS_NAME;
 	@session_name($session_name);
-	
+
 	if (!isset($_COOKIE[$session_name])) {
 		$r = session_start();
 		if ($r !== true) {
         	setcookie($session_name, '', 1);
-		}	
+		}
 	} else {
 	    session_start();
 	}
-	
+
 	/*@session_name(SESS_NAME);
 	//Set the current session id
 	if(isset($_GET[SESS_NAME]) && !empty($_GET[SESS_NAME])) {
@@ -471,6 +471,8 @@ mso-padding-alt:0cm 0cm 1.0pt 0cm'><span style='font-size:11.0pt'>Удостов
 
 function w_footer($s=array(), $date='') {
 	global $dbInst;
+
+    $stmChief = ! empty($s['chief']) ? stmChiefShort($s['chief']) : 'А. Терзиева';
 ?>
 <p class=MsoNormal><span style='font-size:14.0pt'><o:p>&nbsp;</o:p></span></p>
 
@@ -485,7 +487,7 @@ style='mso-tab-count:4'>                            
 style='mso-tab-count:1'>                   </span>Лекар СТМ:<o:p></o:p></span></p>
 
 <p class=MsoNormal align=right style='text-align:right'><span style='font-size:
-14.0pt'>(............................................)<o:p></o:p></span></p>
+14.0pt'>(<?php echo HTMLFormat($stmChief); ?>)<o:p></o:p></span></p>
 
 <?php
 }
@@ -1093,7 +1095,7 @@ function makeFileName($firm_name = '') {
 	$firm_name = str_replace('”', '', $firm_name);
 	$firm_name = str_replace('„', '', $firm_name);
 	$firm_name = str_replace('_-_', '_', $firm_name);
-	
+
 	require_once("cyrlat.class.php");
 	$cyrlat = new CyrLat;
 	return $cyrlat->cyr2lat($firm_name);
@@ -1186,13 +1188,13 @@ if (!function_exists('json_encode')) {
 
 function getChart($data = array(), $imgname = '', $title = '') {
 	include "libchart/classes/libchart.php";
-	
+
 	if(empty($imgname)) {
 		$imgname = strtolower(basename($_SERVER['PHP_SELF']));
 		$imgname = str_replace('.php', '', $imgname);
 		$imgname = str_replace(' ', '_', $imgname);
 	}
-	
+
 	$http = !empty($_SERVER['HTTPS']) ? 'https://' : 'http://';
 	$libchart_path = $http . ((isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : $_SERVER['SERVER_ADDR'].':'.$_SERVER['SERVER_PORT'])) . rtrim(dirname($_SERVER['PHP_SELF']), '/\\') . "/libchart/";
 
@@ -1211,7 +1213,7 @@ function getChart($data = array(), $imgname = '', $title = '') {
 		new Color(167, 192, 199),	// #A7C0C7
 		new Color(218, 233, 202)	// #DAE9CA
 	));
-	
+
 	$dataSet = new XYSeriesDataSet();
 	foreach ($data as $key => $val) {
 		$serie = new XYDataSet();
@@ -1225,7 +1227,7 @@ function getChart($data = array(), $imgname = '', $title = '') {
 	//$chart->setTitle('Разпределение по брой случаи');
 	$chart->setTitle('');
 	$chart->render('libchart/generated/'.$imgname.'.png');
-	
+
 	$ret = '';
 	if(!empty($title)) {
 		$ret .= '<p class=MsoNormal>'.$title.'</p>';
@@ -1244,13 +1246,13 @@ function getChart($data = array(), $imgname = '', $title = '') {
 
 function NEW_getChart($data = array(), $imgname = '', $title = '') {
 	include "libchart/classes/libchart.php";
-	
+
 	if(empty($imgname)) {
 		$imgname = strtolower(basename($_SERVER['PHP_SELF']));
 		$imgname = str_replace('.php', '', $imgname);
 		$imgname = str_replace(' ', '_', $imgname);
 	}
-	
+
 	$libchart_path = "http://" . ((isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : $_SERVER['SERVER_ADDR'].':'.$_SERVER['SERVER_PORT'])) . rtrim(dirname($_SERVER['PHP_SELF']), '/\\') . "/libchart/";
 
 	$chart = new VerticalBarChart(660,300);
@@ -1268,7 +1270,7 @@ function NEW_getChart($data = array(), $imgname = '', $title = '') {
 		new Color(167, 192, 199),	// #A7C0C7
 		new Color(218, 233, 202)	// #DAE9CA
 	));
-	
+
 	$dataSet = new XYSeriesDataSet();
 	foreach ($data as $key => $val) {
 		$serie = new XYDataSet();
@@ -1284,7 +1286,7 @@ function NEW_getChart($data = array(), $imgname = '', $title = '') {
 	$generated_file = 'libchart/generated/'.$imgname.'.png';
 	$chart->render($generated_file);
 	$base64 = chunk_split(base64_encode(file_get_contents($generated_file)));
-	
+
 	$ret = '';
 	if(!empty($title)) {
 		$ret .= '<p class=MsoNormal>'.$title.'</p>';
@@ -1354,4 +1356,59 @@ function generateFileName($firm_name = '', $filename_start = 'Spisak_', $file_ex
 	if(!empty($file_ext)) $filename .= '.'.$file_ext;
 
 	return $filename;
+}
+
+/**
+* @param string $stmName
+* @return string
+ */
+function stmNameShort($stmName)
+{
+    // Define the full phrase to be replaced
+    $fullPhrase = "Служба по трудова медицина";
+    // Define the abbreviation to replace the full phrase
+    $abbreviation = "СТМ";
+
+    // Use str_replace to perform the replacement.
+    // This function is case-sensitive.
+    return str_replace($fullPhrase, $abbreviation, $stmName);
+}
+
+/**
+* @param string $chief
+* @return string
+ */
+function stmChiefShort($chief)
+{
+    // Ensure UTF-8 encoding is set for multi-byte string functions
+    // This is crucial for correctly handling Cyrillic characters with mb_substr.
+    mb_internal_encoding('UTF-8');
+
+    // Trim leading/trailing whitespace from the full name to ensure clean processing.
+    $fullName = trim($chief);
+
+    // Split the full name into parts based on the first space encountered.
+    // The limit of 2 ensures that we get at most two elements:
+    // 1. The first name (or the first word of a multi-word first name).
+    // 2. The rest of the string, which includes the last name and any middle names.
+    $parts = explode(' ', $chief, 2);
+
+    // If the name does not contain a space (e.g., "Петър") or is an empty string,
+    // or if explode doesn't result in at least two parts, return the original full name.
+    if (count($parts) < 2) {
+        return $chief;
+    }
+
+    // The first element is the first name (or the first part of it).
+    $firstName = $parts[0];
+    // The second element is the rest of the name (last name and any middle names).
+    $lastNameAndRemaining = $parts[1];
+
+    // Extract the first character of the first name.
+    // mb_substr is used to correctly handle multi-byte characters like those in Cyrillic.
+    $firstInitial = mb_substr($firstName, 0, 1);
+
+    // Combine the first initial, a period, a space, and the rest of the name.
+    // This forms the abbreviated name.
+    return $firstInitial . '. ' . $lastNameAndRemaining;
 }

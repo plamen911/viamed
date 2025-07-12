@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='utf-8'?>
+<data>
+    <sql>
+        <query>UPDATE stm_info SET stm_name = 'Служба по трудова медицина "ВИАМЕД" ЕООД' WHERE stm_id = 1</query>
+    </sql>
+</data>

@@ -68,12 +68,12 @@ function fnGenerateTable($data = array(), $colWidts = array(), $colAligns = arra
 		$table = $sect->addTable();
 		$table->addRows($rowCount);
 		$table->addColumnsList($colWidts);
-		
+
 		//borders
 		$border = PHPRtfLite_Border::create($rtf, 1, '#000000');
 		$table->setBorderForCellRange($border, 1, 1, $rowCount, $colCount);
 	}
-	
+
 	foreach ($data as $i => $rows) {
 		foreach ($rows as $j => $row) {
 			$rowIndex = $i + 1;
@@ -150,14 +150,14 @@ function fnExtractTableData($table = '') {
 
 function fnGenerateChart($data = array(), $imgname = '', $title = '') {
 	global $sect, $times11, $times12, $alignLeft;
-	
+
 	include "libchart/classes/libchart.php";
-	
+
 	if(empty($imgname)) {
 		$imgname = strtolower(basename($_SERVER['PHP_SELF'], '.php'));
 		$imgname = str_replace(' ', '_', $imgname);
 	}
-	
+
 	$libchart_path = 'libchart/';
 
 	$chart = new VerticalBarChart(660,300);
@@ -175,7 +175,7 @@ function fnGenerateChart($data = array(), $imgname = '', $title = '') {
 		new Color(167, 192, 199),	// #A7C0C7
 		new Color(218, 233, 202)	// #DAE9CA
 	));
-	
+
 	$dataSet = new XYSeriesDataSet();
 	foreach ($data as $key => $val) {
 		$serie = new XYDataSet();
@@ -189,17 +189,17 @@ function fnGenerateChart($data = array(), $imgname = '', $title = '') {
 	//$chart->setTitle('Разпределение по брой случаи');
 	$chart->setTitle('');
 	$chart->render($libchart_path.'generated/'.$imgname.'.png');
-	
+
 	$ret = '';
 	if(!empty($title)) {
 		$sect->writeText($title.' ', $times12, $alignLeft);
 	}
 	$sect->addImage($libchart_path.'generated/'.$imgname.'.png', null);
-	
+
 	$i = 0;
 	$images = array('blue', 'orange', 'brown', 'red', 'beige', 'smoke', 'dark', 'dark_blue', 'light_blue', 'light_green');
 	$sect->writeText('Легенда:', $times12, $alignLeft);
-	
+
 	foreach ($data as $key => $val) {
 		if(!isset($images[$i])) { $i = 0; }
 		$sect->addImage($libchart_path.'images/'.$images[$i].'.png', new PHPRtfLite_ParFormat());
@@ -238,7 +238,7 @@ function fnChartDataPercentsList($dataMap, $total, $suffix, $sect, $font, $parFo
  * @param PHPRtfLite_ParFormat $parFormat
  * @return void
  */
-function fnGeneralConclusion($firmName, $timePeriod, $sect, $font, $parFormat)
+function BKP_2025_07_12_fnGeneralConclusion($firmName, $timePeriod, $sect, $font, $parFormat)
 {
     $sect->writeText('    Във връзка с гореизложеното, въпреки, че работодателят е предприел всички необходими мерки за осигуряване на здравословни и безопасни условия на труд, съществува частична връзка между данните за заболеваемостта и условията на труд. От анализа на база болнични листове, регистрираните заболявания с най-висок относителен дял по честота на случаите и дните имат пряка връзка с условията на труд в период на вирусни епидемии.', $font, $parFormat);
     $sect->writeText('    За много от заболяванията има и други причини, като генетични фактори, здравна култура, начин на хранене, вредни навици и други, които могат да инициират или обострят развили се вече заболявания. Такива са:', $font, $parFormat);
@@ -258,5 +258,33 @@ function fnGeneralConclusion($firmName, $timePeriod, $sect, $font, $parFormat)
     $sect->writeText('    7. Мониториране на факторите на работната среда и на трудовия процес, и на здравното състояние на работещите с цел ранното откриване на „ранимите групи“ и адекватния подход към тях;', $font, $parFormat);
     $sect->writeText('    8. Реализиране съвместно със СТМ на програми за промоция на здравето на работещите на работното място, отстраняване на рисковите фактори на начина на живот, опазване и укрепване на работоспособността и преодоляване на стреса при работа;', $font, $parFormat);
     $sect->writeText('    9. Спазване на разпоредбите на Министерство на здравеопазването и регионалния оперативен щаб и периодичен инструктаж във връзка с извънредната епидемиологична обстановка и разясняване на необходимостта от прилагане на противоепидемичните мерки.', $font, $parFormat);
+    $sect->addEmptyParagraph();
+}
+
+/**
+ * @param string $firmName
+ * @param string $timePeriod
+ * @param PHPRtfLite_Container_Section $sect
+ * @param PHPRtfLite_Font $font
+ * @param PHPRtfLite_ParFormat $parFormat
+ * @return void
+ */
+function fnGeneralConclusion($firmName, $timePeriod, $sect, $font, $parFormat)
+{
+    $sect->writeText('    Във връзка с гореизложеното считаме, че работодателят е предприел всички необходими мерки за осигуряване на здравословни и безопасни условия на труд и няма връзка между данните за заболеваемостта и условията на труд. От анализа на база болнични листове регистрираните заболявания с най-висок относителен дял по честота на случаите и дните имат пряка връзка със сезонни вирусни епидемии и инфекции.', $font, $parFormat);
+    $sect->writeText('    За много от заболяванията има и други причини, като генетични фактори, здравна култура, начин на хранене, вредни навици и други, които могат да инициират или обострят развили се вече заболявания. Такива са:', $font, $parFormat);
+    $sect->writeText('    - Наднорменото тегло – една от основните причини за заболяването артериална хипертония;', $font, $parFormat);
+    $sect->writeText('    - Фамилната обремененост – наличието на генетична предиспозиция многократно увеличава вероятността от развитие на редица заболявания на сърдечно-съдовата система и жлези с вътрешна секреция;', $font, $parFormat);
+    $sect->writeText('    - Тютюнопушене и употреба на алкохол – наличието на тези социално-значими фактори е предпоставка за развитие на хронични заболявания.', $font, $parFormat);
+    $sect->addEmptyParagraph();
+    $sect->writeText('    След предоставяне на обобщения анализ на заболяваемостта на работещите в ' . $firmName . ' през ' . $timePeriod . ' г. препоръчваме да бъде продължена добрата практика относно:', $font, $parFormat);
+    $sect->writeText('    1. Отделяне на специално внимание на конкретните мерки за оптимизиране на условията на труд и за редуциране на установените рискови фактори;', $font, $parFormat);
+    $sect->writeText('    2. Трудоустрояването на подходящи места на лицата с установени заболявания;', $font, $parFormat);
+    $sect->writeText('    3. При постъпване на работа работодателят да изисква медицинско свидетелство от предварителните медицински прегледи със заключение за професионална пригодност, съгл. Нар. 3 от 1987 г. /ДВ бр. 16 от 1987 г./;', $font, $parFormat);
+    $sect->writeText('    4. Динамичното наблюдение: редовни периодични медицински прегледи, като се вземе предвид необходимите медицински специалисти и изследвания и честотата на провеждане по препоръчания от СТМ ВИАМЕД ЕООД списък, насочване към личния лекар за проследяване и лечение;', $font, $parFormat);
+    $sect->writeText('    5. Повишаване на информираността на работещите за прилагане на утвърдените правила за диспансерно наблюдение и медикаментозно контролиране, с цел недопускане на ранни усложнения и инвалидизации в работоспособна възраст;', $font, $parFormat);
+    $sect->writeText('    6. Спазване на утвърдения Режим на труд и почивка в дружеството;', $font, $parFormat);
+    $sect->writeText('    7. Мониториране на факторите на работната среда и на трудовия процес, и на здравното състояние на работещите с цел ранното откриване на „ранимите групи“ и адекватния подход към тях;', $font, $parFormat);
+    $sect->writeText('    8. Реализиране съвместно със СТМ на програми за промоция на здравето на работещите на работното място, отстраняване на рисковите фактори на начина на живот, опазване и укрепване на работоспособността и преодоляване на стреса при работа;', $font, $parFormat);
     $sect->addEmptyParagraph();
 }
