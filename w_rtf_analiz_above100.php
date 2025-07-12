@@ -117,7 +117,7 @@ if(!empty($data)) {
     $sect->writeText('    От направения анализ на разпределението по случаи се наблюдава следното подреждане:', $times12, $alignLeft);
     fnChartDataPercentsList($tbl['chart_data'], $primary_charts, 'случаи', $sect, $times12, $alignLeft);
     $sect->addEmptyParagraph();
-    $sect->writeText('    Налага се мнението за преобладаващи заболявания от общ характер или многофакторни заболявания и като причинно-следствена връзка: сезонността като водеща причина и наличната световна пандемия от коронавирусни инфекции.', $times12, $alignLeft);
+    $sect->writeText('    Налага се мнението за преобладаващи заболявания от общ характер или многофакторни заболявания и като причинно-следствена връзка: фамилна обремененост, здравна култура и физиологични фактори.', $times12, $alignLeft);
     $sect->addEmptyParagraph();
 }
 
@@ -137,7 +137,7 @@ if(!empty($data)) {
     $sect->writeText('    От графиката е видно следното подреждане:', $times12, $alignLeft);
     fnChartDataPercentsList($tbl['chart_data'], $days_off, 'дни', $sect, $times12, $alignLeft);
     $sect->addEmptyParagraph();
-    $sect->writeText('    Показателят честота на дните не следва разпределението на честотата на случаите по нозологични единици, защото за различните случаи или диагнози са необходими различни периоди от време за възстановяване или оздравяване, като се има предвид и настоящата епидемия от коронавирусна инфекция, при която периода за възстановяване не следва карантинните мерки.', $times12, $alignLeft);
+    $sect->writeText('    Показателят честота на дните не следва разпределението на честотата на случаите по нозологични единици, защото за различните случаи или диагнози са необходими различни периоди от време за възстановяване или оздравяване.', $times12, $alignLeft);
     $sect->addEmptyParagraph();
 }
 
@@ -320,62 +320,62 @@ if(!empty($data)) {
 	$rowCount = count($data);
 	$colWidts = array(7, 2, 2, 1.5, 1.5, 1.5, 1.5);
 	$colAligns = array('left', 'center', 'center', 'center', 'center', 'center', 'center');
-	
+
 	$rowCount = count($data);
 	$colCount = count($colWidts);
 	$table = $sect->addTable();
 	$table->addRows($rowCount);
 	$table->addColumnsList($colWidts);
-	
+
 	//borders
 	$border = PHPRtfLite_Border::create($rtf, 1, '#000000');
 	$table->setBorderForCellRange($border, 1, 1, $rowCount, $colCount);
-	
+
 	$table->mergeCellRange(1, 1, 2, 1);
 	$table->writeToCell(1, 1, 'Професия', $times11, $alignCenter);
 	$border = PHPRtfLite_Border::create($rtf, 1, '#000000');
 	$table->setBorderForCellRange($border, 1, 1, 2, 1);
 	$table->setVerticalAlignmentForCellRange(PHPRtfLite_Table_Cell::VERTICAL_ALIGN_CENTER, 1, 1, 2, 7);
-	
+
 	$table->mergeCellRange(1, 2, 1, 3);
 	$table->writeToCell(1, 2, 'Заболяемост с трайна неработоспособност', $times11, $alignCenter);
 	$border = PHPRtfLite_Border::create($rtf, 1, '#000000');
 	$table->setBorderForCellRange($border, 1, 2, 1, 3);
-	
+
 	$table->mergeCellRange(1, 4, 1, 5);
 	$table->writeToCell(1, 4, 'Професионална заболяемост', $times11, $alignCenter);
 	$border = PHPRtfLite_Border::create($rtf, 1, '#000000');
 	$table->setBorderForCellRange($border, 1, 4, 1, 5);
-	
+
 	$table->mergeCellRange(1, 6, 1, 7);
 	$table->writeToCell(1, 6, 'Трудова злополука', $times11, $alignCenter);
 	$border = PHPRtfLite_Border::create($rtf, 1, '#000000');
 	$table->setBorderForCellRange($border, 1, 6, 1, 7);
-	
+
 	$table->writeToCell(2, 2, 'брой', $times11, $alignCenter);
 	$border = PHPRtfLite_Border::create($rtf, 1, '#000000');
 	$table->setBorderForCellRange($border, 2, 2);
-	
+
 	$table->writeToCell(2, 3, 'честота', $times11, $alignCenter);
 	$border = PHPRtfLite_Border::create($rtf, 1, '#000000');
 	$table->setBorderForCellRange($border, 2, 3);
-	
+
 	$table->writeToCell(2, 4, 'брой', $times11, $alignCenter);
 	$border = PHPRtfLite_Border::create($rtf, 1, '#000000');
 	$table->setBorderForCellRange($border, 2, 4);
-	
+
 	$table->writeToCell(2, 5, 'честота', $times11, $alignCenter);
 	$border = PHPRtfLite_Border::create($rtf, 1, '#000000');
 	$table->setBorderForCellRange($border, 2, 5);
-	
+
 	$table->writeToCell(2, 6, 'брой', $times11, $alignCenter);
 	$border = PHPRtfLite_Border::create($rtf, 1, '#000000');
 	$table->setBorderForCellRange($border, 2, 6);
-	
+
 	$table->writeToCell(2, 7, 'честота', $times11, $alignCenter);
 	$border = PHPRtfLite_Border::create($rtf, 1, '#000000');
 	$table->setBorderForCellRange($border, 2, 7);
-	
+
 	$data = array_slice($data, 2, count($data) - 1, true);
 	fnGenerateTable($data, $colWidts, $colAligns, $tableType = 'small', $table);
 }
