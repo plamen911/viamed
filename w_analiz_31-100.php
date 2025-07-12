@@ -1,4 +1,8 @@
 <?php
+/**
+ * @global $dbInst
+ */
+
 // http://localhost/stm2008/hipokrat/w_analiz_31-100.php?firm_id=187&date_from=01.01.2011&date_to=31.12.2012&offline=1
 require('includes.php');
 require('class.stmstats.php');
@@ -296,7 +300,7 @@ normal'><span style='font-size:14.0pt'><?=HTMLFormat($firm_address)?><o:p></o:p>
  	if(false !== strpos($stm_name, 'ВИАМЕД')) {
  		$avg_men = round($avg_men, 0);
  		$avg_women = round($avg_women, 0);
- 		$avg_workers = $avg_men + $avg_women;	
+ 		$avg_workers = $avg_men + $avg_women;
  		$sick_anual_workers = round($objStats->sick_anual_workers);
  	}
  }
@@ -411,7 +415,7 @@ lang=X-NONE style='mso-ansi-language:X-NONE'>II. Анализ и оценка н
 <p class=MsoNormal style='text-align:justify;'>2. Честота на
 случаите с временна неработоспособност: <?=$objStats->freqCasesTempDisability()?>.</p>
 
-<p class=MsoNormal style='text-align:justify;'>3. Честота на 
+<p class=MsoNormal style='text-align:justify;'>3. Честота на
 трудозагубите с временна неработоспособност: <?=$objStats->freqDaysOffTempDisability()?>.</p>
 
 <p class=MsoNormal style='text-align:justify;'>4. Средна
@@ -440,7 +444,7 @@ lang=X-NONE style='mso-ansi-language:X-NONE'>8. Описание на често
 
 <?=$tbl?>
 
-<p class=MsoNormal style='text-indent:35.4pt'>По основни признаци, показателите на заболеваемостта с временна неработоспособност 
+<p class=MsoNormal style='text-indent:35.4pt'>По основни признаци, показателите на заболеваемостта с временна неработоспособност
 са представени в следната таблица:</p>
 <?=$objStats->getAnaliticsTable()?>
 <p class=MsoNormal><o:p>&nbsp;</o:p></p>

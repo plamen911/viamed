@@ -25,7 +25,7 @@ $alignRight = new PHPRtfLite_ParFormat(PHPRtfLite_ParFormat::TEXT_ALIGN_RIGHT);
 
 $sect = $rtf->addSection();
 
-$image = $sect->addImage('img/logo_viamed.jpg');
+$image = $sect->addImage('img/logo_viamed2.jpg');
 /*
 $fsize = 20;
 if(isset($s['stm_name'])) {
